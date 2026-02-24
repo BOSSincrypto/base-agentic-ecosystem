@@ -903,10 +903,10 @@ ORDER BY SUM(agents_created) DESC
 ```sql
 WITH daily_dex AS (
     SELECT
-        date_trunc('day', block_time) AS day,
+        CAST(block_time AS DATE) AS day,
         COUNT(*) AS trades,
         SUM(amount_usd) AS volume_usd,
-        COUNT(DISTINCT taker) AS unique_traders
+        COUNT(DISTINCT tx_from) AS unique_traders
     FROM dex.trades
     WHERE blockchain = 'base'
       AND (token_bought_address = 0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
@@ -915,40 +915,61 @@ WITH daily_dex AS (
     GROUP BY 1
 ),
 
-daily_receivers AS (
+first_seen_receivers AS (
     SELECT
-        date_trunc('day', block_time) AS day,
-        COUNT(DISTINCT "to") AS daily_unique_receivers
-    FROM tokens.transfers
-    WHERE blockchain = 'base'
-      AND contract_address = 0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
-      AND block_time >= DATE '2026-01-01'
+        "to" AS receiver,
+        MIN(CAST(evt_block_time AS DATE)) AS first_day 
+    FROM erc20_base.evt_Transfer
+    WHERE contract_address = 0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
+      AND evt_block_time >= DATE '2026-01-01'
     GROUP BY 1
+),
+
+daily_new_receivers AS (
+    SELECT
+        first_day AS day,
+        COUNT(DISTINCT receiver) AS new_receivers
+    FROM first_seen_receivers
+    GROUP BY 1
+),
+
+daily_receivers_active AS (
+    SELECT
+        CAST(evt_block_time AS DATE) AS day,
+        COUNT(DISTINCT "to") AS daily_unique_receivers
+    FROM erc20_base.evt_Transfer
+    WHERE contract_address = 0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
+      AND evt_block_time >= DATE '2026-01-01'
+    GROUP BY 1
+),
+
+date_spine AS (
+    SELECT day FROM UNNEST(sequence(DATE '2026-01-01', current_date, interval '1' day)) AS t(day)
 ),
 
 combined AS (
     SELECT
-        dd.day,
-        dd.trades AS "DEX Trades",
-        ROUND(dd.volume_usd, 0) AS "Volume USD",
-        dd.unique_traders AS "Unique Traders",
-        COALESCE(dr.daily_unique_receivers, 0) AS "Daily Unique Receivers",
-        AVG(dd.trades) OVER (ORDER BY dd.day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS "Trades 7d MA",
-        AVG(dd.volume_usd) OVER (ORDER BY dd.day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS "Volume 7d MA",
-        SUM(COALESCE(dr.daily_unique_receivers, 0)) OVER (ORDER BY dd.day) AS "Cumulative Receivers (2026)"
-    FROM daily_dex dd
-    LEFT JOIN daily_receivers dr ON dd.day = dr.day
+        ds.day,
+        COALESCE(dd.trades, 0) AS "DEX Trades",
+        COALESCE(dd.volume_usd, 0) AS "Volume USD",
+        COALESCE(dd.unique_traders, 0) AS "Unique Traders",
+        COALESCE(dra.daily_unique_receivers, 0) AS "Daily Unique Receivers",
+        COALESCE(dnr.new_receivers, 0) AS "New Receivers"
+    FROM date_spine ds
+    LEFT JOIN daily_dex dd ON ds.day = dd.day
+    LEFT JOIN daily_receivers_active dra ON ds.day = dra.day
+    LEFT JOIN daily_new_receivers dnr ON ds.day = dnr.day
 )
 
 SELECT
     day,
     "DEX Trades",
-    "Volume USD",
+    ROUND("Volume USD", 0) AS "Volume USD",
     "Unique Traders",
     "Daily Unique Receivers",
-    ROUND("Trades 7d MA", 0) AS "Trades 7d MA",
-    ROUND("Volume 7d MA", 0) AS "Volume 7d MA",
-    "Cumulative Receivers (2026)"
+    ROUND(AVG("DEX Trades") OVER (ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 0) AS "Trades 7d MA",
+    ROUND(AVG("Volume USD") OVER (ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 0) AS "Volume 7d MA",
+    SUM("New Receivers") OVER (ORDER BY day) AS "Cumulative Receivers (2026)"
 FROM combined
 WHERE day < current_date
 ORDER BY day ASC
