@@ -32,35 +32,6 @@ ocoin_daily AS (
     GROUP BY 1
 ),
 
--- Total holders for each token
-coc_holders AS (
-    SELECT COUNT(DISTINCT wallet) AS coc_holder_count
-    FROM (
-        SELECT
-            "to" AS wallet,
-            SUM(amount) AS received
-        FROM tokens.transfers
-        WHERE blockchain = 'base'
-          AND contract_address = 0x4c3DEa2858e66c1e116b1eB54b4404025F84cFE9
-        GROUP BY 1
-        HAVING SUM(amount) > 0
-    )
-),
-
-ocoin_holders AS (
-    SELECT COUNT(DISTINCT wallet) AS ocoin_holder_count
-    FROM (
-        SELECT
-            "to" AS wallet,
-            SUM(amount) AS received
-        FROM tokens.transfers
-        WHERE blockchain = 'base'
-          AND contract_address = 0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
-        GROUP BY 1
-        HAVING SUM(amount) > 0
-    )
-),
-
 date_spine AS (
     SELECT day FROM UNNEST(sequence(DATE '2025-06-01', current_date, interval '1' day)) AS t(day)
 )

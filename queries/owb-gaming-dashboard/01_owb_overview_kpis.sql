@@ -70,12 +70,25 @@ dex_vol AS (
       AND block_time >= now() - interval '30' day
 ),
 
--- Holder count (unique addresses that received OWB)
+-- Holder count (net positive balance holders)
 holders AS (
-    SELECT COUNT(DISTINCT "to") AS holder_count
-    FROM tokens.transfers
-    WHERE blockchain = 'base'
-      AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
+    SELECT COUNT(*) AS holder_count
+    FROM (
+        SELECT wallet, SUM(net_amount) AS balance
+        FROM (
+            SELECT "to" AS wallet, amount AS net_amount
+            FROM tokens.transfers
+            WHERE blockchain = 'base'
+              AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
+            UNION ALL
+            SELECT "from" AS wallet, -amount AS net_amount
+            FROM tokens.transfers
+            WHERE blockchain = 'base'
+              AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
+        ) t
+        GROUP BY 1
+        HAVING SUM(net_amount) > 0
+    )
 ),
 
 -- Staking transactions count (30d)
