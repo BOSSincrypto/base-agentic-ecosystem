@@ -103,7 +103,7 @@ combined AS (
         ROUND(r.usdc_reserves + (r.owb_reserves * COALESCE(p.owb_price, 0)), 2) AS "TVL (USD)"
     FROM reserves r
     LEFT JOIN daily_price p ON r.day = p.day
-    WHERE r.day >= DATE '2025-06-01'
+    WHERE r.day >= DATE '2026-01-01'
 )
 
 SELECT * FROM combined
