@@ -8,7 +8,7 @@ WITH gaming_contracts AS (
     SELECT address, name, category FROM (
         VALUES
         -- Agentic Gaming Infrastructure
-        (0x5e9e09b03d08017fddbc1652e9394e7cb4a24074, 'Last AI Standing', 'Survival Game'),
+        (0x88beBFeA498619D4eA891E707c47C43E2D43E62d, 'Last AI Standing', 'Survival Game'),
         -- OWB Ecosystem (for comparison)
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'OWB Token', 'GameFi Token'),
         (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'CoC Rewards Claim', 'GameFi Rewards'),

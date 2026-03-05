@@ -23,7 +23,7 @@
 
 | Project | Contract | Type | Description |
 |---------|----------|------|-------------|
-| Last AI Standing | `0x5e9e09b03d08017fddbc1652e9394e7cb4a24074` | Game Contract | USDC survival game — agents pay to stay alive, dead fund the living |
+| Last AI Standing | `0x88beBFeA498619D4eA891E707c47C43E2D43E62d` | Game Contract | USDC survival game — agents pay to stay alive, dead fund the living |
 | Agent Royale ($ROYAL) | `0xF5178A7562B580309F48a4dc8aCDDAf15587eb07` | Token | On-chain battle competition — agents fight for ETH prize pool |
 | Clash of Coins (OWB) | `0xEF5997c2cf2f6c138196f8a6203afc335206b3c1` | Token | First agentic tournament on Base — $1M prize pool |
 | Clash of Coins Rewards | `0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40` | ClaimRewards | On-chain rewards claim for Clash of Coins players |
@@ -34,7 +34,9 @@
 |----------|---------|---------|
 | OWB Token (ERC-20) | `0xEF5997c2cf2f6c138196f8a6203afc335206b3c1` | Core ecosystem token — powers purchases, upgrades, rewards |
 | ClaimRewards | `0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40` | Periodic rewards claim — backend-signed, on-chain execution |
-| oCOIN Token | `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03` | In-game economy currency |
+| oCOIN Token | `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03` | In-game economy currency (NOTE: team questions relevance — verify before using) |
+| CoC NFT Sales (vOWB+USDC) | `0x3C83eF6119EB05Ca44144F05b331dbEE60656d5b` | Web version CoC NFT sales (vOWB and USDC) |
+| CoC NFT Sales (Base App) | `0xf46A1D3eAA84558887169CF2CEE343491364c8BA` | Base app NFT sales (USDC only) |
 | OWB/USDC Aerodrome | `0x995985c9027e8a90c823a5e0a9112fea72d1f4dd` | Main DEX liquidity pool |
 | OWB/USDC Uniswap V3 | `0xf252f51919dfca2c9c0ea279f11183580edee4d6` | Secondary DEX liquidity pool (0.01% fee, 100% locked) |
 
@@ -178,7 +180,7 @@ Below we track three core pillars of OWB's agentic economy:
 | **Bot / Agent Census** | Active bots, new onboarding, retention, activity distribution | Adoption depth — how many agents are actually participating? |
 | **Smart Contract Telemetry** | Tx counts, volumes, contract-level breakdown, hourly patterns | Infrastructure load — how active is the on-chain layer? |
 
-**Contracts monitored:** OWB Token, ClaimRewards, oCOIN, DEX pools (Aerodrome + Uniswap V3)
+**Contracts monitored:** OWB Token, ClaimRewards, DEX pools (Aerodrome + Uniswap V3), NFT Sales, Base App Sales
 
 > OWB Token: `0xEF5997c2cf2f6c138196f8a6203afc335206b3c1` | [Aerodrome](https://aerodrome.finance) | [CoinMarketCap](https://coinmarketcap.com/currencies/owb/)
 ```
@@ -235,7 +237,7 @@ Raw infrastructure metrics across all OWB-related smart contracts on Base. This 
 WITH gaming_contracts AS (
     SELECT address, name FROM (
         VALUES
-        (0x5e9e09b03d08017fddbc1652e9394e7cb4a24074, 'Last AI Standing'),
+        (0x88beBFeA498619D4eA891E707c47C43E2D43E62d, 'Last AI Standing'),
         (0xF5178A7562B580309F48a4dc8aCDDAf15587eb07, 'Agent Royale'),
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'Clash of Coins (OWB)'),
         (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'CoC Rewards Claim')
@@ -251,7 +253,7 @@ daily_raw AS (
         COUNT(DISTINCT t."from") AS daily_players
     FROM base.transactions t
     INNER JOIN gaming_contracts gc ON t."to" = gc.address
-    WHERE t.block_time >= DATE '2025-01-01'
+    WHERE t.block_time >= DATE '2026-01-01'
       AND t.success = true
     GROUP BY 1, 2
 ),
@@ -269,7 +271,7 @@ unique_players_total AS (
     SELECT COUNT(DISTINCT t."from") AS unique_players
     FROM base.transactions t
     INNER JOIN gaming_contracts gc ON t."to" = gc.address
-    WHERE t.block_time >= DATE '2025-01-01'
+    WHERE t.block_time >= DATE '2026-01-01'
       AND t.success = true
 ),
 
@@ -308,7 +310,7 @@ prev_week AS (
 -- Date spine for continuous chart
 date_spine AS (
     SELECT day
-    FROM UNNEST(sequence(DATE '2025-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
+    FROM UNNEST(sequence(DATE '2026-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
 ),
 
 -- Daily filled (with zeros for missing days)
@@ -360,7 +362,7 @@ CROSS JOIN active_projects ap
 CROSS JOIN current_week cw
 CROSS JOIN prev_week pw
 WHERE wm.day < CURRENT_DATE
-  AND wm.day >= DATE '2025-06-01'
+  AND wm.day >= DATE '2026-01-01'
 ORDER BY wm.day ASC
 ```
 
@@ -431,7 +433,7 @@ ORDER BY wm.day ASC
 WITH gaming_contracts AS (
     SELECT address, name, category FROM (
         VALUES
-        (0x5e9e09b03d08017fddbc1652e9394e7cb4a24074, 'Last AI Standing', 'Survival'),
+        (0x88beBFeA498619D4eA891E707c47C43E2D43E62d, 'Last AI Standing', 'Survival'),
         (0xF5178A7562B580309F48a4dc8aCDDAf15587eb07, 'Agent Royale', 'Battle Arena'),
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'Clash of Coins (OWB)', 'Tournament'),
         (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'CoC Rewards Claim', 'Rewards')
@@ -603,13 +605,14 @@ ORDER BY txs_30d DESC
 -- Sources: ClaimRewards events, OWB transfers to game contracts, DEX activity
 -- OWB Token: 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
 -- ClaimRewards: 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
--- oCOIN: 0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
+-- NFT Sales (Web): 0x3C83eF6119EB05Ca44144F05b331dbEE60656d5b
+-- NFT Sales (Base App): 0xf46A1D3eAA84558887169CF2CEE343491364c8BA
+-- NOTE: oCOIN (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03) removed per team feedback — unknown/unverified
 
 WITH owb_ecosystem_contracts AS (
     SELECT address, name FROM (
         VALUES
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards'),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03, 'oCOIN Contract')
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards')
     ) AS t(address, name)
 ),
 
@@ -624,7 +627,7 @@ claim_activity AS (
     FROM base.transactions t
     WHERE t."to" = 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
       AND t.success = true
-      AND t.block_time >= DATE '2025-01-01'
+      AND t.block_time >= DATE '2026-01-01'
     GROUP BY 1
 ),
 
@@ -640,14 +643,50 @@ owb_inflows AS (
     WHERE blockchain = 'base'
       AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       AND "to" IN (
-          0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40,
-          0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
+          0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
       )
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
     GROUP BY 1
 ),
 
--- 3) OWB DEX trading volume (market activity = ecosystem attention)
+-- 3) NFT Sales revenue (Web version CoC)
+nft_web_sales AS (
+    SELECT
+        DATE_TRUNC('month', block_time) AS month,
+        'NFT Sales (Web)' AS source,
+        COUNT(*) AS tx_count,
+        COUNT(DISTINCT tx_from) AS unique_addresses,
+        0 AS owb_amount,
+        -- vOWB sales topic: 0xf10061092bbb1af405b21f944d5a3fc967534deaabe2a030b36dfdd9e565d1e6
+        -- USDC sales topic: 0x63283f7a7cc750062bcd0676724d5ad05f2fa23df7619d9bde3f8abc776575d1
+        0 AS volume_usd
+    FROM base.logs
+    WHERE contract_address = 0x3C83eF6119EB05Ca44144F05b331dbEE60656d5b
+      AND (
+          topic0 = 0xf10061092bbb1af405b21f944d5a3fc967534deaabe2a030b36dfdd9e565d1e6
+          OR topic0 = 0x63283f7a7cc750062bcd0676724d5ad05f2fa23df7619d9bde3f8abc776575d1
+      )
+      AND block_time >= DATE '2026-01-01'
+    GROUP BY 1
+),
+
+-- 4) NFT Sales revenue (Base App — USDC only)
+nft_app_sales AS (
+    SELECT
+        DATE_TRUNC('month', t.block_time) AS month,
+        'NFT Sales (App)' AS source,
+        COUNT(*) AS tx_count,
+        COUNT(DISTINCT t."from") AS unique_addresses,
+        0 AS owb_amount,
+        0 AS volume_usd
+    FROM base.transactions t
+    WHERE t."to" = 0xf46A1D3eAA84558887169CF2CEE343491364c8BA
+      AND t.success = true
+      AND t.block_time >= DATE '2026-01-01'
+    GROUP BY 1
+),
+
+-- 5) OWB DEX trading volume (market activity = ecosystem attention)
 dex_activity AS (
     SELECT
         DATE_TRUNC('month', block_time) AS month,
@@ -661,7 +700,7 @@ dex_activity AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
       AND amount_usd > 0
     GROUP BY 1
 ),
@@ -685,7 +724,7 @@ owb_price AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
       AND amount_usd > 0
     GROUP BY 1
 ),
@@ -715,6 +754,10 @@ monthly_combined AS (
         SELECT month, source, tx_count, unique_addresses, 0, owb_amount, 0 FROM owb_inflows
         UNION ALL
         SELECT month, source, tx_count, unique_addresses, 0, 0, volume_usd FROM dex_activity
+        UNION ALL
+        SELECT month, source, tx_count, unique_addresses, 0, owb_amount, volume_usd FROM nft_web_sales
+        UNION ALL
+        SELECT month, source, tx_count, unique_addresses, 0, owb_amount, volume_usd FROM nft_app_sales
     ) combined
     GROUP BY 1
 )
@@ -828,9 +871,31 @@ inflow_rev AS (
     WHERE blockchain = 'base'
       AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       AND "to" IN (
-          0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40,
-          0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
+          0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
       )
+      AND block_time >= DATE_TRUNC('month', NOW()) - INTERVAL '1' month
+      AND block_time < DATE_TRUNC('month', NOW())
+),
+nft_web_rev AS (
+    SELECT
+        'NFT Sales (Web)' AS source,
+        CAST(COUNT(*) AS DOUBLE) AS revenue_usd -- proxy: count events as engagement
+    FROM base.logs
+    WHERE contract_address = 0x3C83eF6119EB05Ca44144F05b331dbEE60656d5b
+      AND (
+          topic0 = 0xf10061092bbb1af405b21f944d5a3fc967534deaabe2a030b36dfdd9e565d1e6
+          OR topic0 = 0x63283f7a7cc750062bcd0676724d5ad05f2fa23df7619d9bde3f8abc776575d1
+      )
+      AND block_time >= DATE_TRUNC('month', NOW()) - INTERVAL '1' month
+      AND block_time < DATE_TRUNC('month', NOW())
+),
+nft_app_rev AS (
+    SELECT
+        'NFT Sales (App)' AS source,
+        CAST(COUNT(*) AS DOUBLE) AS revenue_usd -- proxy
+    FROM base.transactions
+    WHERE "to" = 0xf46A1D3eAA84558887169CF2CEE343491364c8BA
+      AND success = true
       AND block_time >= DATE_TRUNC('month', NOW()) - INTERVAL '1' month
       AND block_time < DATE_TRUNC('month', NOW())
 )
@@ -839,6 +904,10 @@ UNION ALL
 SELECT * FROM claim_rev
 UNION ALL
 SELECT * FROM inflow_rev
+UNION ALL
+SELECT * FROM nft_web_rev
+UNION ALL
+SELECT * FROM nft_app_rev
 ORDER BY revenue_usd DESC
 ```
 
@@ -872,17 +941,16 @@ ORDER BY revenue_usd DESC
 ```sql
 -- OWB Agentic: Bot / Agent Census
 -- Tracks unique wallet addresses as "bots" interacting with OWB ecosystem
--- Contracts: OWB Token transfers, ClaimRewards, oCOIN, DEX trades
+-- Contracts: OWB Token transfers, ClaimRewards, DEX trades
 -- OWB: 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
 -- ClaimRewards: 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
--- oCOIN: 0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
+-- NOTE: oCOIN removed per team feedback — unknown/unverified
 
 WITH owb_contracts AS (
     SELECT address FROM (
         VALUES
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1),
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03)
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40)
     ) AS t(address)
 ),
 
@@ -894,7 +962,7 @@ all_interactions AS (
     FROM base.transactions t
     INNER JOIN owb_contracts oc ON t."to" = oc.address
     WHERE t.success = true
-      AND t.block_time >= DATE '2025-01-01'
+      AND t.block_time >= DATE '2026-01-01'
 
     UNION ALL
 
@@ -905,7 +973,7 @@ all_interactions AS (
     FROM tokens.transfers
     WHERE blockchain = 'base'
       AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
 
     UNION ALL
 
@@ -919,7 +987,7 @@ all_interactions AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
 ),
 
 -- First seen per bot
@@ -967,7 +1035,7 @@ daily_agg AS (
 -- Date spine
 date_spine AS (
     SELECT day
-    FROM UNNEST(sequence(DATE '2025-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
+    FROM UNNEST(sequence(DATE '2026-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
 ),
 
 -- Fill gaps
@@ -1052,7 +1120,7 @@ CROSS JOIN kpi_dab kd
 CROSS JOIN kpi_new_30d kn
 CROSS JOIN avg_claims ac
 WHERE wm.day < CURRENT_DATE
-  AND wm.day >= DATE '2025-06-01'
+  AND wm.day >= DATE '2026-01-01'
 ORDER BY wm.day ASC
 ```
 
@@ -1104,8 +1172,7 @@ WITH owb_contracts AS (
     SELECT address FROM (
         VALUES
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1),
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03)
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40)
     ) AS t(address)
 ),
 
@@ -1183,14 +1250,13 @@ ORDER BY sort_order
 -- Tracks all transaction activity across OWB ecosystem contracts
 -- OWB Token: 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
 -- ClaimRewards: 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
--- oCOIN: 0x5B8F638330d7D6bD9D43811fe702F6894e97EF03
+-- NOTE: oCOIN removed per team feedback — unknown/unverified
 
 WITH owb_contracts AS (
     SELECT address, name FROM (
         VALUES
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'OWB Token'),
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards'),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03, 'oCOIN')
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards')
     ) AS t(address, name)
 ),
 
@@ -1206,7 +1272,7 @@ daily_per_contract AS (
     FROM base.transactions t
     INNER JOIN owb_contracts oc ON t."to" = oc.address
     WHERE t.success = true
-      AND t.block_time >= DATE '2025-01-01'
+      AND t.block_time >= DATE '2026-01-01'
     GROUP BY 1, 2
 ),
 
@@ -1224,7 +1290,7 @@ daily_dex AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2025-01-01'
+      AND block_time >= DATE '2026-01-01'
       AND amount_usd > 0
     GROUP BY 1
 ),
@@ -1252,7 +1318,7 @@ daily_totals AS (
 -- Date spine
 date_spine AS (
     SELECT day
-    FROM UNNEST(sequence(DATE '2025-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
+    FROM UNNEST(sequence(DATE '2026-01-01', CURRENT_DATE, INTERVAL '1' day)) AS t(day)
 ),
 
 -- Filled daily totals
@@ -1315,7 +1381,7 @@ FROM with_ma wm
 CROSS JOIN kpi_30d k
 CROSS JOIN kpi_unique ku
 WHERE wm.day < CURRENT_DATE
-  AND wm.day >= DATE '2025-06-01'
+  AND wm.day >= DATE '2026-01-01'
 ORDER BY wm.day ASC
 ```
 
@@ -1325,12 +1391,12 @@ ORDER BY wm.day ASC
 
 ```sql
 -- OWB: Activity Breakdown by Contract (30d)
+-- NOTE: oCOIN removed per team feedback — unknown/unverified
 WITH owb_contracts AS (
     SELECT address, name FROM (
         VALUES
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'OWB Token'),
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards'),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03, 'oCOIN')
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'ClaimRewards')
     ) AS t(address, name)
 ),
 
@@ -1381,12 +1447,12 @@ ORDER BY "Transactions (30d)" DESC
 -- OWB: Hourly Activity Heatmap (Last 30 Days)
 -- Shows when OWB ecosystem is most active (hour x day of week)
 
+-- NOTE: oCOIN removed per team feedback — unknown/unverified
 WITH owb_contracts AS (
     SELECT address FROM (
         VALUES
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1),
-        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40),
-        (0x5B8F638330d7D6bD9D43811fe702F6894e97EF03)
+        (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40)
     ) AS t(address)
 )
 
@@ -1451,7 +1517,7 @@ ORDER BY 3, 1
 4. **Цвета:**
    - OWB Token: `#F97316`
    - ClaimRewards: `#22C55E`
-   - oCOIN: `#06B6D4`
+   - NFT Sales: `#06B6D4`
    - DEX (OWB Pairs): `#F59E0B`
 5. **Показать %**
 6. **Ширина:** 6 колонок
@@ -1569,7 +1635,7 @@ OWB (Clash of Coins) metrics are tracked across four on-chain data sources:
 
 2. **Таблицы:** Используй `base.transactions` для прямых tx, `dex.trades` для DEX, `tokens.transfers` (с `WHERE blockchain = 'base'`) для ERC20 трансферов.
 
-3. **Производительность:** Если запрос медленный — убедись что есть фильтр по дате (`AND t.block_time >= DATE '2025-01-01'`).
+3. **Производительность:** Если запрос медленный — убедись что есть фильтр по дате (`AND t.block_time >= DATE '2026-01-01'`).
 
 4. **DAY_OF_WEEK / HOUR:** Это функции DuneSQL (Trino). Если ошибка — попробуй `EXTRACT(DOW FROM t.block_time)` и `EXTRACT(HOUR FROM t.block_time)`.
 
@@ -1593,6 +1659,56 @@ OWB (Clash of Coins) metrics are tracked across four on-chain data sources:
 
 ---
 
+# БУДУЩИЕ РАЗДЕЛЫ (PLACEHOLDER)
+
+## Section 5: Humans vs AI — Сравнение активности людей и агентов
+
+> **Статус:** Планируется. Будет реализован после запуска agentic контрактов (ориентировочно через 7-10 дней).
+
+**Концепция:**
+Раздел для сравнения количества и активности "кожаных" (людей) с количеством и активностью автономных агентов в играх.
+
+**Методика (предварительная):**
+1. **Идентификация:** Классификация адресов по поведенческим паттернам (частота транзакций, регулярность интервалов, время суток активности)
+2. **Метрики сравнения:**
+   - Humans vs Agents: количество уникальных адресов
+   - Humans vs Agents: объём транзакций (30d)
+   - Humans vs Agents: средняя активность (txs/day)
+   - Retention rate: люди vs агенты
+3. **Визуализации:**
+   - Stacked bar: Human vs Agent wallet count by week
+   - Dual-axis line: Human activity vs Agent activity over time
+   - Pie chart: Share of transactions by wallet type
+
+**Необходимые данные:**
+- Аналитика claim intervals (бот-паттерны < 15 min)
+- Временная активность (боты работают 24/7, люди — нет)
+- Количество контрактов в обращении (боты обычно используют 1 контракт)
+
+---
+
+## Концепт: Agentic Metrics × Token Price Overlay
+
+> **Статус:** Идея. Будет рассмотрена после накопления данных за 2-3 месяца.
+
+**Вопрос:** Влияет ли onboarding агентов в экосистему игры на market cap? Если да — как и с каким лагом?
+
+**Подход:**
+1. Наложить на график курса токена OWB следующие метрики:
+   - Количество новых ботов/агентов (daily)
+   - MRR proxy (monthly)
+   - Транзакционная активность (daily)
+2. Корреляционный анализ с лагом 1d, 3d, 7d, 14d
+3. Визуализация: dual-axis chart с price line + agent metrics overlay
+
+**Ограничения:**
+- Для статистической значимости нужно минимум 60-90 дней данных
+- Внешние факторы (рыночные условия, листинги) могут искажать корреляцию
+- Необходим контрольный период без agentic активности для baseline
+
+---
+
 *Документ создан: 4 марта 2026*
-*Отслеживаемые контракты: OWB, ClaimRewards, oCOIN, Last AI Standing, Agent Royale*
+*Обновлён: 5 марта 2026 — исправлены контракты, даты, добавлены NFT revenue sources*
+*Отслеживаемые контракты: OWB, ClaimRewards, NFT Sales (Web + App), Last AI Standing, Agent Royale*
 *Формат: DuneSQL (Trino-based)*

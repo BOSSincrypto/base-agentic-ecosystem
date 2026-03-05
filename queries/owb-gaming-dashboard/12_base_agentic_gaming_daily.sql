@@ -5,7 +5,7 @@
 WITH gaming_contracts AS (
     SELECT address, name FROM (
         VALUES
-        (0x5e9e09b03d08017fddbc1652e9394e7cb4a24074, 'Last AI Standing'),
+        (0x88beBFeA498619D4eA891E707c47C43E2D43E62d, 'Last AI Standing'),
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'OWB Token'),
         (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'CoC Rewards'),
         (0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb, 'OWB Staking')
@@ -20,7 +20,7 @@ daily_raw AS (
         COUNT(DISTINCT t."from") AS daily_users
     FROM base.transactions t
     INNER JOIN gaming_contracts gc ON t."to" = gc.address
-    WHERE t.block_time >= DATE '2025-06-01'
+    WHERE t.block_time >= DATE '2026-01-01'
       AND t.success = true
     GROUP BY 1, 2
 ),

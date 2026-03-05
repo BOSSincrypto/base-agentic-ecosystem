@@ -59,7 +59,9 @@ All addresses verified on BaseScan (March 2026). These are the contracts tracked
 | **Staking** | `0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb` | OWB staking with dynamic APY |
 | **Rewards Claim** | `0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40` | Claim rewards from Clash of Coins |
 | **COC Token** | `0x4c3DEa2858e66c1e116b1eB54b4404025F84cFE9` | In-game currency (Clash of Coins) |
-| **oCOIN Token** | `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03` | Secondary in-game token |
+| **oCOIN Token** | `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03` | Secondary in-game token (NOTE: team questions relevance — verify before using) |
+| **CoC NFT Sales (Web)** | `0x3C83eF6119EB05Ca44144F05b331dbEE60656d5b` | NFT sales: vOWB (topic `0xf1006109...`) + USDC (topic `0x63283f7a...`) |
+| **CoC NFT Sales (Base App)** | `0xf46A1D3eAA84558887169CF2CEE343491364c8BA` | Base app NFT sales (USDC only) |
 | **Uniswap V3 Pool** | `0xf252f51919dfca2c9c0ea279f11183580edee4d6` | OWB/USDC 0.01% fee tier |
 | **Aerodrome Pool** | `0x995985C9027E8a90C823a5E0a9112Fea72d1F4DD` | OWB/USDC AMM pool |
 
@@ -67,7 +69,7 @@ All addresses verified on BaseScan (March 2026). These are the contracts tracked
 
 | Contract | Address | Project |
 |----------|---------|---------|
-| **Last AI Standing** | `0x5e9e09b03d08017fddbc1652e9394e7cb4a24074` | Survival game for AI agents |
+| **Last AI Standing** | `0x88beBFeA498619D4eA891E707c47C43E2D43E62d` | Survival game for AI agents |
 
 ### Reference Tokens
 
@@ -715,7 +717,7 @@ For each saved query, create the appropriate visualizations:
      - Rewards: `0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40`
      - COC: `0x4c3DEa2858e66c1e116b1eB54b4404025F84cFE9`
      - oCOIN: `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03`
-     - Last AI Standing: `0x5e9e09b03d08017fddbc1652e9394e7cb4a24074`
+     - Last AI Standing: `0x88beBFeA498619D4eA891E707c47C43E2D43E62d`
      ```
 
 5. **Save the dashboard** and set visibility to **Public**.
