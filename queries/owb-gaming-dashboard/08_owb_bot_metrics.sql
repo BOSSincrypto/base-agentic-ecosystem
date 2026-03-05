@@ -24,7 +24,7 @@ WITH claim_activity AS (
         END AS avg_seconds_between_claims
     FROM base.transactions t
     WHERE t."to" = 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
-      AND t.block_time >= DATE '2026-01-01'
+      AND t.block_time >= DATE '2025-06-01'
       AND t.success = true
     GROUP BY 1
 ),

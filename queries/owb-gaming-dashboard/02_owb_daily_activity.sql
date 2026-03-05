@@ -21,7 +21,7 @@ daily_contract AS (
         COUNT(DISTINCT t."from") AS daily_users
     FROM base.transactions t
     INNER JOIN owb_contracts oc ON t."to" = oc.address
-    WHERE t.block_time >= DATE '2026-01-01'
+    WHERE t.block_time >= DATE '2025-06-01'
       AND t.success = true
     GROUP BY 1, 2
 ),
@@ -39,14 +39,14 @@ daily_dex AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2026-01-01'
+      AND block_time >= DATE '2025-06-01'
     GROUP BY 1
 ),
 
 -- Date spine
 date_spine AS (
     SELECT day
-    FROM UNNEST(sequence(DATE '2026-01-01', current_date, interval '1' day)) AS t(day)
+    FROM UNNEST(sequence(DATE '2025-06-01', current_date, interval '1' day)) AS t(day)
 ),
 
 -- Fill gaps for contract data (aggregate across categories)

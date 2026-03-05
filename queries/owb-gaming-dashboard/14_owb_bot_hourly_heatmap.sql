@@ -20,7 +20,7 @@ WITH claim_wallets AS (
         0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40,
         0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb
     )
-    AND t.block_time >= DATE '2026-01-01'
+    AND t.block_time >= DATE '2025-06-01'
     AND t.success = true
     GROUP BY 1
 ),

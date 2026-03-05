@@ -73,7 +73,7 @@ SELECT
     SUM(new_holders) OVER (ORDER BY day) AS "Cumulative Holders",
     AVG(new_holders) OVER (ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS "New Holders 7d MA"
 FROM daily_new
-WHERE day >= DATE '2026-01-01'
+WHERE day >= DATE '2025-06-01'
   AND day < current_date
 ORDER BY day ASC
 

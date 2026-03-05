@@ -14,7 +14,7 @@ WITH monthly_staking AS (
         SUM(t.gas_used * t.gas_price / 1e18) AS staking_eth_gas
     FROM base.transactions t
     WHERE t."to" = 0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb
-      AND t.block_time >= DATE '2026-01-01'
+      AND t.block_time >= DATE '2025-06-01'
       AND t.success = true
     GROUP BY 1
 ),
@@ -27,7 +27,7 @@ monthly_claims AS (
         SUM(t.gas_used * t.gas_price / 1e18) AS claims_eth_gas
     FROM base.transactions t
     WHERE t."to" = 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
-      AND t.block_time >= DATE '2026-01-01'
+      AND t.block_time >= DATE '2025-06-01'
       AND t.success = true
     GROUP BY 1
 ),
@@ -47,7 +47,7 @@ monthly_dex AS (
           token_bought_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
           OR token_sold_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
       )
-      AND block_time >= DATE '2026-01-01'
+      AND block_time >= DATE '2025-06-01'
     GROUP BY 1
 ),
 
@@ -62,7 +62,7 @@ monthly_token_activity AS (
     FROM tokens.transfers
     WHERE blockchain = 'base'
       AND contract_address = 0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
-      AND block_date >= DATE '2026-01-01'
+      AND block_date >= DATE '2025-06-01'
       AND "to" NOT IN (
           0xf252f51919dfca2c9c0ea279f11183580edee4d6,  -- Uniswap V3 pool
           0x995985C9027E8a90C823a5E0a9112Fea72d1F4DD,  -- Aerodrome pool

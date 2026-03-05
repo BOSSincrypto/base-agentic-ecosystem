@@ -19,7 +19,7 @@ WITH all_interactions AS (
         0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb,
         0xEF5997c2cf2f6c138196f8a6203afc335206b3c1
     )
-    AND t.block_time >= DATE '2026-01-01'
+    AND t.block_time >= DATE '2025-06-01'
     AND t.success = true
 ),
 
