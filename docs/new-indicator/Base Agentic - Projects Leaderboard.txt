@@ -1,0 +1,135 @@
+WITH agentic_contracts AS (
+    SELECT address, name, category FROM (
+        VALUES
+        (0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b, 'Virtuals Protocol', 'Infrastructure'),
+        (0x96419929d7949d6a801a6909c145c8eef6a40431, 'Spectral', 'Infrastructure'),
+        (0x1bc0c42215582d5a085795f4badbac3ff36d1bcb, 'Clanker', 'Infrastructure'),
+        (0xacfE6019Ed1A7Dc6f7B508C02d1b04ec88cC21bf, 'Venice', 'Infrastructure'),
+        (0x4f9fd6be4a90f2620860d680c0d4d5fb53d1a825, 'AIXBT', 'Infrastructure'),
+        (0xC44141a684f6AA4E36cD9264ab55550B03C88643, 'Ethy AI', 'Infrastructure'),
+        (0x58Db197E91Bc8Cf1587F75850683e4bd0730e6BF, 'Axelrod', 'Infrastructure'),
+        (0x1b4617734c43f6159f3a70b7e06d883647512778, 'AWE', 'Consumer'),
+        (0xb33Ff54b9F7242EF1593d2C9Bcd8f9df46c77935, 'FAI', 'Consumer'),
+        (0x731814e491571a2e9ee3c5b1f7f3b962ee8f4870, 'VADER', 'Consumer'),
+        (0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07, 'CLAWD', 'Consumer'),
+        (0x22af33fe49fd1fa80c7149773dde5890d3c76f3b, 'Bankr', 'Consumer'),
+        (0xA4A2E2ca3fBfE21aed83471D28b6f65A233C6e00, 'Ribbita', 'Consumer')
+    ) AS t(address, name, category)
+),
+metrics_30d AS (
+    SELECT
+        ac.name AS project,
+        ac.category,
+        COUNT(*) AS txs_30d,
+        COUNT(DISTINCT t."from") AS users_30d
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= now() - interval '30' day
+      AND t.success = true
+    GROUP BY 1, 2
+),
+metrics_7d AS (
+    SELECT
+        ac.name AS project,
+        COUNT(*) AS txs_7d,
+        COUNT(DISTINCT t."from") AS users_7d
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= now() - interval '7' day
+      AND t.success = true
+    GROUP BY 1
+),
+metrics_prev_7d AS (
+    SELECT
+        ac.name AS project,
+        COUNT(*) AS txs_prev_7d,
+        COUNT(DISTINCT t."from") AS users_prev_7d
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= now() - interval '14' day
+      AND t.block_time < now() - interval '7' day
+      AND t.success = true
+    GROUP BY 1
+),
+holders AS (
+    SELECT
+        project,
+        COUNT(*) AS holders_count
+    FROM (
+        SELECT
+            ac.name AS project,
+            wallet,
+            SUM(net_amount) AS balance
+        FROM (
+            SELECT
+                tt.contract_address,
+                tt."to" AS wallet,
+                CAST(tt.amount_raw AS double) AS net_amount
+            FROM tokens_base.transfers tt
+            INNER JOIN agentic_contracts ac ON tt.contract_address = ac.address
+
+            UNION ALL
+
+            SELECT
+                tt.contract_address,
+                tt."from" AS wallet,
+                -CAST(tt.amount_raw AS double) AS net_amount
+            FROM tokens_base.transfers tt
+            INNER JOIN agentic_contracts ac ON tt.contract_address = ac.address
+        ) flows
+        INNER JOIN agentic_contracts ac ON flows.contract_address = ac.address
+        GROUP BY 1, 2
+        HAVING SUM(net_amount) > 0
+    ) positive_balances
+    GROUP BY 1
+),
+scored AS (
+    SELECT
+        m.project,
+        m.category,
+        m.txs_30d,
+        m.users_30d,
+        COALESCE(m7.txs_7d, 0) AS txs_7d,
+        COALESCE(m7.users_7d, 0) AS users_7d,
+        COALESCE(h.holders_count, 0) AS holders,
+        ROUND(CAST(m.txs_30d AS double) / NULLIF(m.users_30d, 0), 1) AS avg_txs_per_user,
+        CASE
+            WHEN COALESCE(mp.txs_prev_7d, 0) > 0
+            THEN ROUND(100.0 * (COALESCE(m7.txs_7d, 0) - mp.txs_prev_7d) / mp.txs_prev_7d, 1)
+            ELSE NULL
+        END AS wow_txs_growth_pct,
+        CASE
+            WHEN COALESCE(mp.users_prev_7d, 0) > 0
+            THEN ROUND(100.0 * (COALESCE(m7.users_7d, 0) - mp.users_prev_7d) / mp.users_prev_7d, 1)
+            ELSE NULL
+        END AS wow_users_growth_pct,
+        0.55 * m.txs_30d / NULLIF(MAX(m.txs_30d) OVER (), 0) * 100 AS score_txs,
+        0.45 * m.users_30d / NULLIF(MAX(m.users_30d) OVER (), 0) * 100 AS score_users,
+        (
+            0.55 * m.txs_30d / NULLIF(MAX(m.txs_30d) OVER (), 0)
+          + 0.45 * m.users_30d / NULLIF(MAX(m.users_30d) OVER (), 0)
+        ) * 100 AS activity_score
+    FROM metrics_30d m
+    LEFT JOIN metrics_7d m7 ON m.project = m7.project
+    LEFT JOIN metrics_prev_7d mp ON m.project = mp.project
+    LEFT JOIN holders h ON m.project = h.project
+)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY activity_score DESC) AS "#",
+    project AS "Project",
+    category AS "Category",
+    txs_30d AS "Txs (30d)",
+    users_30d AS "Users (30d)",
+    txs_7d AS "Txs (7d)",
+    holders AS "Holders",
+    avg_txs_per_user AS "Avg Txs/User",
+    wow_txs_growth_pct AS "WoW Txs %",
+    wow_users_growth_pct AS "WoW Users %",
+    ROUND(activity_score, 1) AS "Activity Score",
+    ROUND(score_txs, 1) AS "Score: Transactions",
+    ROUND(score_users, 1) AS "Score: Users"
+FROM scored
+ORDER BY activity_score DESC

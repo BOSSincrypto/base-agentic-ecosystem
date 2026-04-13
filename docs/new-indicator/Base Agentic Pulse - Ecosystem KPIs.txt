@@ -1,0 +1,94 @@
+WITH agentic_contracts AS (
+    SELECT address, name, category FROM (
+        VALUES
+        (0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b, 'Virtuals Protocol', 'Infrastructure'),
+        (0x96419929d7949d6a801a6909c145c8eef6a40431, 'Spectral', 'Infrastructure'),
+        (0x1bc0c42215582d5a085795f4badbac3ff36d1bcb, 'Clanker', 'Infrastructure'),
+        (0xacfE6019Ed1A7Dc6f7B508C02d1b04ec88cC21bf, 'Venice', 'Infrastructure'),
+        (0x4f9fd6be4a90f2620860d680c0d4d5fb53d1a825, 'AIXBT', 'Infrastructure'),
+        (0xC44141a684f6AA4E36cD9264ab55550B03C88643, 'Ethy AI', 'Infrastructure'),
+        (0x58Db197E91Bc8Cf1587F75850683e4bd0730e6BF, 'Axelrod', 'Infrastructure'),
+        (0x1b4617734c43f6159f3a70b7e06d883647512778, 'AWE', 'Consumer'),
+        (0xb33Ff54b9F7242EF1593d2C9Bcd8f9df46c77935, 'FAI', 'Consumer'),
+        (0x731814e491571a2e9ee3c5b1f7f3b962ee8f4870, 'VADER', 'Consumer'),
+        (0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07, 'CLAWD', 'Consumer'),
+        (0x22af33fe49fd1fa80c7149773dde5890d3c76f3b, 'Bankr', 'Consumer'),
+        (0xA4A2E2ca3fBfE21aed83471D28b6f65A233C6e00, 'Ribbita', 'Consumer')
+    ) AS t(address, name, category)
+),
+current_week AS (
+    SELECT
+        COUNT(*) AS total_txs,
+        COUNT(DISTINCT t."from") AS unique_users
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= now() - interval '7' day
+      AND t.success = true
+),
+prev_week AS (
+    SELECT
+        COUNT(*) AS total_txs,
+        COUNT(DISTINCT t."from") AS unique_users
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= now() - interval '14' day
+      AND t.block_time < now() - interval '7' day
+      AND t.success = true
+),
+all_time AS (
+    SELECT
+        COUNT(*) AS total_txs,
+        COUNT(DISTINCT t."from") AS unique_users
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= DATE '2026-01-01'
+      AND t.success = true
+),
+agents_8004 AS (
+    SELECT
+        COUNT(*) AS total_agents_registered
+    FROM base.logs l
+    WHERE l.contract_address = 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432
+      AND l.topic0 = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+      AND l.topic1 = 0x0000000000000000000000000000000000000000000000000000000000000000
+),
+category_split AS(
+    SELECT
+        ac.category,
+        COUNT(*) AS txs
+    FROM base.transactions t
+    INNER JOIN agentic_contracts ac
+        ON t."to" = ac.address
+    WHERE t.block_time >= DATE '2026-01-01'
+      AND t.success = true
+    GROUP BY 1
+)
+SELECT
+    at.total_txs AS "Total Transactions (2026 YTD)",
+    at.unique_users AS "Unique Addresses (2026 YTD)",
+    a8.total_agents_registered AS "ERC-8004 Agents Registered",
+    cw.total_txs AS "This Week Txs",
+    pw.total_txs AS "Last Week Txs",
+    CASE
+        WHEN pw.total_txs > 0
+        THEN ROUND(100.0 * (cw.total_txs - pw.total_txs) / pw.total_txs, 1)
+        ELSE 0
+    END AS "WoW Growth %",
+    cw.unique_users AS "This Week Users",
+    pw.unique_users AS "Last Week Users",
+    CASE
+        WHEN pw.unique_users > 0
+        THEN ROUND(100.0 * (cw.unique_users - pw.unique_users) / pw.unique_users, 1)
+        ELSE 0
+    END AS "WoW Users Growth %",
+    COALESCE(MAX(CASE WHEN cs.category = 'Infrastructure' THEN cs.txs END), 0) AS "Infrastructure Txs YTD",
+    COALESCE(MAX(CASE WHEN cs.category = 'Consumer' THEN cs.txs END), 0) AS "Consumer Txs YTD"
+FROM all_time at
+CROSS JOIN agents_8004 a8
+CROSS JOIN current_week cw
+CROSS JOIN prev_week pw
+CROSS JOIN category_split cs
+GROUP BY 1,2,3,4,5,6,7,8,9

@@ -1,0 +1,89 @@
+WITH base_tokens AS (
+    SELECT address FROM (
+        VALUES
+        (0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b),
+        (0x96419929d7949d6a801a6909c145c8eef6a40431),
+        (0x1bc0c42215582d5a085795f4badbac3ff36d1bcb),
+        (0xacfE6019Ed1A7Dc6f7B508C02d1b04ec88cC21bf),
+        (0x4f9fd6be4a90f2620860d680c0d4d5fb53d1a825),
+        (0xC44141a684f6AA4E36cD9264ab55550B03C88643),
+        (0x58Db197E91Bc8Cf1587F75850683e4bd0730e6BF),
+        (0x1b4617734c43f6159f3a70b7e06d883647512778),
+        (0xb33Ff54b9F7242EF1593d2C9Bcd8f9df46c77935),
+        (0x731814e491571a2e9ee3c5b1f7f3b962ee8f4870),
+        (0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07),
+        (0x22af33fe49fd1fa80c7149773dde5890d3c76f3b),
+        (0xA4A2E2ca3fBfE21aed83471D28b6f65A233C6e00)
+    ) AS t(address)
+),
+base_weekly AS (
+    SELECT
+        DATE_TRUNC('week', d.block_time) AS week,
+        'Base' AS chain,
+        COUNT(*) AS trades,
+        COUNT(DISTINCT d.taker) AS traders,
+        ROUND(SUM(CAST(d.amount_usd AS DOUBLE)), 0) AS volume_usd
+    FROM dex.trades d
+    WHERE d.blockchain = 'base'
+      AND (
+          d.token_bought_address IN (SELECT address FROM base_tokens)
+          OR d.token_sold_address IN (SELECT address FROM base_tokens)
+      )
+      AND d.block_time >= NOW() - INTERVAL '84' DAY
+      AND d.amount_usd > 0
+    GROUP BY 1
+),
+solana_weekly AS (
+    SELECT
+        DATE_TRUNC('week', d.block_time) AS week,
+        'Solana' AS chain,
+        COUNT(*) AS trades,
+        COUNT(DISTINCT d.trader_id) AS traders,
+        ROUND(SUM(CAST(d.amount_usd AS DOUBLE)), 0) AS volume_usd
+    FROM dex_solana.trades d
+    WHERE (
+          d.token_bought_mint_address IN (
+              'HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC',
+              '9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump',
+              'CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump',
+              '61V8vBaqAGMpfGeQisFBFLbEDnpBXFMqYrBkGz6hpump',
+              '8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn',
+              'KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP',
+              '3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y'
+          )
+          OR d.token_sold_mint_address IN (
+              'HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC',
+              '9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump',
+              'CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump',
+              '61V8vBaqAGMpfGeQisFBFLbEDnpBXFMqYrBkGz6hpump',
+              '8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn',
+              'KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP',
+              '3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y'
+          )
+      )
+      AND d.block_time >= NOW() - INTERVAL '84' DAY
+      AND d.amount_usd > 0
+    GROUP BY 1
+),
+combined AS (
+    SELECT * FROM base_weekly
+    UNION ALL
+    SELECT * FROM solana_weekly
+)
+SELECT
+    week,
+    chain,
+    trades AS "Weekly Trades",
+    traders AS "Weekly Traders",
+    volume_usd AS "Weekly Volume USD",
+    ROUND(
+        100.0 * (volume_usd - LAG(volume_usd) OVER (PARTITION BY chain ORDER BY week))
+        / NULLIF(LAG(volume_usd) OVER (PARTITION BY chain ORDER BY week), 0),
+    1) AS "WoW Volume Growth %",
+    ROUND(
+        100.0 * volume_usd
+        / NULLIF(SUM(volume_usd) OVER (PARTITION BY week), 0),
+    1) AS "Volume Share %"
+FROM combined
+WHERE week < date_trunc('week', now())
+ORDER BY week, chain

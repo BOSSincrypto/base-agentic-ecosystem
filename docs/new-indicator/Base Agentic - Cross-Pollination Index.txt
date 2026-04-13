@@ -1,0 +1,36 @@
+WITH agentic_contracts AS (
+    SELECT address, name FROM (
+        VALUES
+        (0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b, 'Virtuals Protocol'),
+        (0x96419929d7949d6a801a6909c145c8eef6a40431, 'Spectral'),
+        (0x1bc0c42215582d5a085795f4badbac3ff36d1bcb, 'Clanker'),
+        (0xacfE6019Ed1A7Dc6f7B508C02d1b04ec88cC21bf, 'Venice'),
+        (0x4f9fd6be4a90f2620860d680c0d4d5fb53d1a825, 'AIXBT'),
+        (0xC44141a684f6AA4E36cD9264ab55550B03C88643, 'Ethy AI'),
+        (0x58Db197E91Bc8Cf1587F75850683e4bd0730e6BF, 'Axelrod'),
+        (0x1b4617734c43f6159f3a70b7e06d883647512778, 'AWE'),
+        (0xb33Ff54b9F7242EF1593d2C9Bcd8f9df46c77935, 'FAI'),
+        (0x731814e491571a2e9ee3c5b1f7f3b962ee8f4870, 'VADER'),
+        (0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07, 'CLAWD'),
+        (0x22af33fe49fd1fa80c7149773dde5890d3c76f3b, 'Bankr'),
+        (0xA4A2E2ca3fBfE21aed83471D28b6f65A233C6e00, 'Ribbita')
+    ) AS t(address, name)
+),
+wallet_activity AS (
+    SELECT
+        tr."from" AS wallet,
+        COUNT(*) AS total_calls,
+        COUNT(DISTINCT ac.name) AS projects_used
+    FROM base.traces tr
+    INNER JOIN agentic_contracts ac ON tr."to" = ac.address
+    WHERE tr.block_time >= date_trunc('day', now()) - interval '7' day
+      AND tr.success = true
+      AND tr.type = 'call'
+    GROUP BY 1
+)
+SELECT
+    COUNT(CASE WHEN projects_used >= 3 THEN 1 END) AS "Power Users (3+ Projects)",
+    ROUND(AVG(CAST(projects_used AS double)), 2) AS "Avg Projects per User",
+    ROUND(100.0 * COUNT(CASE WHEN projects_used = 1 THEN 1 END) / COUNT(*), 1) AS "Single-Project Users %"
+FROM wallet_activity
+WHERE total_calls < 2000
