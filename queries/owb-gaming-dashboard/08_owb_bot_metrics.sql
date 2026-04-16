@@ -1,7 +1,8 @@
--- OWB Agentic Gaming Dashboard - Query 8: Bot & Automated Activity Metrics
--- Identifies bot-like patterns in OWB ecosystem (high-frequency claimers, automated stakers)
--- Key metric for "Number of Bots" in Section 4
--- Save as: "OWB Gaming - Bot Metrics"
+-- OWB Agentic Gaming Dashboard - Query 8: DTU & Automated Activity Metrics
+-- Identifies automated patterns in OWB ecosystem (high-frequency claimers, automated stakers)
+-- DTU = Daily Transacting Users (preferred over "bot" terminology)
+-- Start date: 2026-03-25 (agentic presale launch)
+-- Save as: "OWB Gaming - DTU Metrics"
 
 WITH claim_activity AS (
     SELECT
@@ -23,9 +24,13 @@ WITH claim_activity AS (
             ELSE NULL
         END AS avg_seconds_between_claims
     FROM base.transactions t
-    WHERE t."to" = 0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40
-      AND t.block_time >= DATE '2026-01-01'
-      AND t.success = true
+    WHERE t."to" IN (
+        0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40,
+        0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb,
+        0xdbfB8BB5464BEf64F499457d3E5Dfd2AD7368203
+    )
+    AND t.block_time >= DATE '2026-03-25'
+    AND t.success = true
     GROUP BY 1
 ),
 
@@ -39,20 +44,16 @@ classified AS (
         first_claim,
         last_claim,
         CASE
-            -- Bot pattern: claims every ~10 min (600s) with very regular intervals
             WHEN total_claims >= 50
                  AND avg_seconds_between_claims IS NOT NULL
-                 AND avg_seconds_between_claims < 900  -- less than 15 min avg
-            THEN 'High-Frequency Bot'
-            -- Semi-automated: regular but less frequent
+                 AND avg_seconds_between_claims < 900
+            THEN 'High-Frequency Automated'
             WHEN total_claims >= 20
                  AND avg_seconds_between_claims IS NOT NULL
-                 AND avg_seconds_between_claims < 3600  -- less than 1 hour avg
+                 AND avg_seconds_between_claims < 3600
             THEN 'Semi-Automated'
-            -- Active human: many claims but irregular
             WHEN total_claims >= 10
             THEN 'Active Player'
-            -- Casual: few claims
             WHEN total_claims >= 3
             THEN 'Casual Player'
             ELSE 'One-Time User'

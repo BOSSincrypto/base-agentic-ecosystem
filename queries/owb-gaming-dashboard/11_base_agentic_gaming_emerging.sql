@@ -1,7 +1,7 @@
 -- OWB Agentic Gaming Dashboard - Query 11: Base Agentic Gaming - Emerging Projects
 -- Section 3: Tracks emerging agentic gaming projects on Base
 -- Max 2 queries for this section (this is query 1 of 2)
--- Projects: Agent Arena, Last AI Standing, DX Terminal Pro, SpaceMolt-adjacent
+-- Projects: Last AI Standing, OWB ecosystem
 -- Save as: "Base Agentic Gaming - Emerging Projects Tracker"
 
 WITH gaming_contracts AS (
@@ -9,10 +9,12 @@ WITH gaming_contracts AS (
         VALUES
         -- Agentic Gaming Infrastructure
         (0x88beBFeA498619D4eA891E707c47C43E2D43E62d, 'Last AI Standing', 'Survival Game'),
-        -- OWB Ecosystem (for comparison)
+        -- OWB Ecosystem
         (0xEF5997c2cf2f6c138196f8a6203afc335206b3c1, 'OWB Token', 'GameFi Token'),
         (0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40, 'CoC Rewards Claim', 'GameFi Rewards'),
-        (0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb, 'OWB Staking', 'GameFi Staking')
+        (0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb, 'Agentic Claim 1', 'Agentic Claims'),
+        (0xdbfB8BB5464BEf64F499457d3E5Dfd2AD7368203, 'Agentic Claim 2', 'Agentic Claims'),
+        (0x692d11c779d43BBC12Cb8565C7f71a54A47D117c, 'OWB Staking', 'GameFi Staking')
     ) AS t(address, name, category)
 ),
 
@@ -35,7 +37,7 @@ project_metrics AS (
     GROUP BY 1, 2
 ),
 
--- WoW growth for each project
+-- Rolling 7d WoW growth for each project
 wow AS (
     SELECT
         gc.name AS project,
@@ -65,7 +67,7 @@ SELECT
     END AS "WoW Growth %",
     CAST(pm.first_activity AS DATE) AS "First Seen",
     CAST(pm.last_activity AS DATE) AS "Last Active",
-    -- Activity Score (simplified: 55% txs + 45% users, normalized)
+    -- Activity Score (55% txs + 45% users, normalized to top performer)
     ROUND(
         55.0 * pm.txs_30d / NULLIF(MAX(pm.txs_30d) OVER (), 0)
         + 45.0 * pm.users_30d / NULLIF(MAX(pm.users_30d) OVER (), 0),
