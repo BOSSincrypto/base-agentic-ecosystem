@@ -2,15 +2,15 @@
 
 ## Purpose
 
-This skill provides comprehensive guidance for writing high-quality, original academic texts in Russian — coursework (курсовые работы), term papers, and research projects. It covers structure, style, citation standards (ГОСТ), formatting, and techniques for producing authentic scholarly prose.
+This skill provides comprehensive guidance for writing high-quality, original academic texts in Russian — coursework (курсовые работы), term papers, and research projects. It integrates academic structure, ГОСТ formatting, Russian typography rules, AI-pattern detection and removal (humanizer), and natural Russian prose style.
 
 ## When to Use
 
 - User asks to write or edit a coursework (курсовая работа), term paper, or academic text in Russian
 - User needs help structuring chapters, paragraphs, introductions, or conclusions
-- User wants to improve academic style or fix stylistic issues
+- User wants to improve academic style, fix stylistic issues, or remove AI-generated patterns
 - User needs proper ГОСТ-compliant bibliography formatting
-- User asks to paraphrase or rewrite text in academic Russian
+- User asks to paraphrase, rewrite, or "humanize" text in academic Russian
 
 ---
 
@@ -57,48 +57,254 @@ Must contain:
 
 ---
 
-## 2. Academic Writing Style Rules (Правила научного стиля)
+## 2. Russian Typography (Типографика)
+
+Apply these rules to ALL Russian text output without exception.
+
+| Rule | Wrong | Correct |
+|---|---|---|
+| Primary quotes: guillemets | "текст" | «текст» |
+| Nested quotes: lapki | «"вложенные"» | «"вложенные"» |
+| Em dash with spaces | слово - слово | слово — слово |
+| En dash for ranges, no spaces | 10-15 дней | 10–15 дней |
+| NBSP after single-letter prepositions | в начале (breakable) | в\u00A0начале |
+| Ellipsis: single character | ... | … |
+| Digit groups with thin spaces | 1000000 | 1 000 000 |
+| Decimal comma (not dot) | 3.14 | 3,14 |
+| Ordinal with hyphen | 1ый, 2ой | 1-й, 2-й |
+| Numero sign | No. 5, #5 | № 5 |
+| Abbreviations with NBSP | т.д., т.е. | т. д., т. е. |
+
+### Typography Checklist (before delivering any Russian text)
+- [ ] Quotes: «» primary, "..." nested
+- [ ] Dashes: — in text, – in ranges, - only in compounds; max 1–2 per paragraph
+- [ ] NBSP after в, к, с, о, у, и, а
+- [ ] Ellipsis: … (single char)
+- [ ] Abbreviations: т. д., т. п. (with NBSP)
+- [ ] No double spaces, no space before punctuation
+
+---
+
+## 3. Academic Writing Style Rules (Правила научного стиля)
 
 ### Core Principles
 1. **Безличность** — avoid first person. Use: "в рамках данного исследования установлено", "автором предложено", "представляется целесообразным"
-2. **Терминологическая точность** — define key terms on first use, use them consistently
-3. **Логическая связность** — every paragraph must follow the pattern: тезис → аргумент → пример/данные → вывод
+2. **Терминологическая точность** — define key terms on first use, use them consistently (do NOT cycle synonyms like AI does)
+3. **Логическая связность** — every paragraph must follow: тезис → аргумент → пример/данные → вывод
 4. **Краткость** — one idea per sentence. Remove filler words and redundant qualifiers
+5. **Активный залог** — prefer active voice with named subjects over passive constructions
 
 ### Sentence Construction
-- Average sentence length: 15–25 words (mix short and long)
+- Average sentence length: 15–25 words (mix short and long for natural rhythm)
 - Vary sentence openings — do NOT start 3+ sentences in a row with the same word or structure
-- Use transitional phrases between paragraphs: "В связи с вышеизложенным...", "Следует отметить, что...", "Вместе с тем...", "Таким образом..."
-- Avoid chains of genitive cases (цепочки родительных падежей): "анализ результатов оценки эффективности деятельности компании" → break into shorter phrases
-
-### Vocabulary
-- Use precise Russian academic vocabulary, not calques from English
-- Avoid bureaucratic clichés: "на сегодняшний день" → "в настоящее время" or just state the fact
-- Avoid emotional/evaluative language: "огромный", "потрясающий" → "значительный", "существенный"
-- Do not overuse intensifiers: "очень", "крайне", "чрезвычайно" — use sparingly
-
-### What to Avoid (Common Markers of AI-Generated Text)
-These patterns are flagged by plagiarism detection systems as signs of machine-generated text:
-
-1. **Redundant double qualifiers** — "непрерывный трудоёмкий процесс", "комплексный всесторонний анализ" — pick ONE adjective
-2. **Excessive bulleted/numbered lists** — convert lists into flowing prose or tables with analysis columns (Definition | Description | Your Conclusion)
-3. **Formulaic structures** — "не только... но и...", "как... так и..." repeated multiple times — vary the syntax
-4. **Uniform paragraph length** — vary between 3–7 sentences per paragraph
-5. **Generic filler phrases** — "В современном мире...", "Как известно...", "Не секрет, что..." — start with specific facts
-6. **Enumerations without analysis** — never just list items; every enumeration needs YOUR commentary explaining why it matters
-7. **Perfect symmetry** — real academic text is slightly asymmetric; not every section needs the same number of subsections
+- Use transitional phrases between paragraphs: "В связи с вышеизложенным...", "Следует отметить, что...", "Вместе с тем..."
+- Avoid chains of genitive cases: "анализ результатов оценки эффективности деятельности компании" → break into shorter phrases
 
 ### Paragraph Structure Pattern
 ```
-[Название/тезис] → [Описание/раскрытие] → [Данные/пример] → [Вывод + связь со следующим параграфом]
+[Тезис] → [Описание/раскрытие] → [Данные/пример] → [Вывод + связь со следующим параграфом]
 ```
 
-Each paragraph's conclusion should bridge to the next paragraph's topic. Example:
+Each paragraph's conclusion should bridge to the next paragraph's topic:
 > "Таким образом, анализ финансовых показателей свидетельствует о стабильном росте выручки компании. Вместе с тем для более полной оценки необходимо рассмотреть факторы внешней среды, влияющие на данную динамику."
 
 ---
 
-## 3. Tables, Figures, and Visual Elements
+## 4. AI-Pattern Detection and Removal (Humanizer)
+
+Based on Wikipedia's "Signs of AI writing" guide and Russian-specific AI-slop patterns. These patterns are flagged by plagiarism detection systems (including antiplagiat.ru) as signs of machine-generated text.
+
+### 4.1 Content Patterns (Паттерны содержания)
+
+#### Искусственная сверхзначимость (Significance Inflation)
+**Слова-маркеры:** выступает в роли, служит ярким доказательством, является свидетельством, ключевой поворотный момент, оставил неизгладимый след, символизирует, подчеркивает важность, вносит значимый вклад, знаменует собой.
+
+**Было:** Открытие библиотеки в 1989 году послужило важной вехой в культурном развитии региона, символизируя глубокую приверженность общества к знаниям.
+**Стало:** Библиотеку открыли в 1989 году, чтобы местные жители могли брать книги ближе к дому.
+
+#### Псевдоглубина через деепричастные обороты
+**Слова-маркеры:** отражая, подчеркивая, демонстрируя, способствуя, воплощая, объединяя, символизируя.
+
+**Было:** Мост выкрашен в красный цвет, символизируя связь города с его историческим прошлым и подчеркивая его приверженность сохранению традиций.
+**Стало:** Мост выкрасили в красный цвет. Архитектор объяснил, что это отсылка к цвету старых кирпичных заводов, когда-то стоявших на этом месте.
+
+#### Рекламный пафос (Promotional Language)
+**Слова-маркеры:** восхитительный, захватывающий дух, непревзойденный, новаторский, настоящий оазис, идеальный баланс, в самом сердце.
+
+**Было:** Расположенный в самом сердце живописного региона, этот потрясающий город может похвастаться богатым культурным наследием.
+**Стало:** Это город в центре региона, известный своей старой архитектурой и еженедельной ярмаркой.
+
+#### Размытые ссылки на авторитеты (Vague Attributions)
+**Слова-маркеры:** некоторые эксперты утверждают, исследования показывают, аналитики подчеркивают, многие критики отмечают.
+
+**Было:** Эксперты считают, что эта река играет важнейшую роль в местной экосистеме.
+**Стало:** Согласно отчету НИИ Экологии за 2021 год, в реке обитает несколько эндемичных видов рыб.
+
+#### Шаблон «Вызовы и Перспективы»
+
+**Было:** Несмотря на все эти вызовы, у компании светлое будущее. Заглядывая вперед, можно с уверенностью сказать...
+**Стало:** В следующем году компания планирует открыть еще три филиала.
+
+### 4.2 Language Patterns (Языковые паттерны)
+
+#### Избегание глагола-связки (Copula Avoidance)
+ИИ заменяет простые "является", "это" на вычурные канцелярские обороты.
+
+**Было:** Здание *представляет собой* музей, который *предоставляет* возможность...
+**Стало:** Это здание — музей, где можно...
+
+#### Правило Трёх (Rule of Three Overuse)
+ИИ группирует сущности в тройки для ритма. Используйте естественное количество.
+
+**Было:** Нас ждут инновации, вдохновение и уникальные инсайты. Эта система быстрая, надежная и безопасная.
+**Стало:** Нас ждут интересные лекции. Эта система работает быстро и без сбоев.
+
+#### Ложные диапазоны (False Ranges)
+
+**Было:** Наше невероятное путешествие: от Большого взрыва до возникновения галактик, от рождения звезд до загадочной темной материи.
+**Стало:** В этой книге идет речь о Большом взрыве, формировании звезд и теориях темной материи.
+
+#### Синонимическая замена (Synonym Cycling)
+ИИ избегает повторов, подставляя синонимы — это выглядит неестественно. Используйте один точный термин.
+
+**Было:** Руководитель компании... Глава организации... Топ-менеджер фирмы... Лидер корпорации...
+**Стало:** Генеральный директор компании (и далее «директор»).
+
+#### Избыточные двойные определения (Redundant Double Qualifiers)
+Выбирайте ОДНО прилагательное, не два.
+
+**Было:** "непрерывный трудоёмкий процесс", "комплексный всесторонний анализ"
+**Стало:** "трудоёмкий процесс", "комплексный анализ"
+
+### 4.3 Structural Patterns (Структурные паттерны)
+
+#### Бинарные противопоставления (Binary Contrasts)
+| Паттерн | Проблема |
+|---------|---------|
+| "Это не просто X, это Y" | Самая избитая структура ИИ |
+| "Речь идет не только о X, но и о Y" | Хеджирование |
+| "Проблема не в X. Проблема в Y." | Формула переформатирования |
+| "Кажется, что это X. Но на самом деле это Y." | Клише «разоблачения» |
+
+**Ориентир:** Называйте сразу Y. Опускайте фальшивую интригу и отрицания.
+
+#### Приписывание ложной субъектности (False Agency)
+Неодушевленные предметы не совершают действий. Называйте конкретного актора.
+
+| Было | Стало |
+|------|-------|
+| "Жалоба превратилась в исправление" | "Команда разработки закрыла баги за два дня" |
+| "Было принято решение" | "Руководитель отдела решил..." |
+| "Данные говорят нам" | "Аналитик, изучив данные, сделал вывод..." |
+| "Рынок вознаграждает" | "Покупатели платят за продукт" |
+
+#### Драматическая рубка фраз (Dramatic Fragmentation)
+| Паттерн | Проблема |
+|---------|---------|
+| "[Существительное]. Вот и все." | Перформативная простота |
+| "А. И еще Б. И еще В." | Псевдо-чеканная подача |
+
+**Ориентир:** Пишите полными предложениями. Доверяйте содержанию.
+
+### 4.4 Style Patterns (Стилистические паттерны)
+
+#### Обилие длинных тире (Em Dash Overuse)
+В русском языке ИИ расставляет тире там, где хватит запятых или точек. Максимум 1–2 тире на абзац.
+
+#### Выделение жирным и списки (Boldface & Lists)
+ИИ начинает пункты списка с жирных терминов + двоеточие, выделяет **каждое важное понятие**. В академическом тексте жирный шрифт используется только для заголовков.
+
+**Правило для курсовых:** Никаких маркированных/нумерованных списков в основном тексте. Преобразуйте в связную прозу или таблицы с колонками: Определение | Описание | Вывод.
+
+#### Равномерная длина абзацев
+Варьируйте между 3–7 предложениями на абзац. Идеальная симметрия — признак ИИ.
+
+---
+
+## 5. Stop-Words and Phrases to Remove (Слова и фразы для удаления)
+
+### Вводные слова-пустышки (удалять полностью)
+- "Важно отметить, что", "Стоит подчеркнуть", "Нельзя не упомянуть"
+- "В современном мире...", "В быстро меняющемся мире..."
+- "Как известно...", "Не секрет, что..."
+- "Как мы увидим далее", "Честно говоря"
+- "Давайте рассмотрим", "В заключение хочется сказать"
+
+### Канцелярит (заменять на простые глаголы)
+| Избегайте | Используйте |
+|-----------|-------------|
+| является | — (тире) или перестроить предложение |
+| осуществлять | делать, проводить |
+| в настоящее время | сейчас |
+| данный | этот |
+| произвести оплату | оплатить |
+| высококачественный | назвать конкретное качество |
+| был осуществлён | активный залог + актор |
+| на сегодняшний день | сегодня |
+| в целях | чтобы |
+| выступает в роли | это, работает как |
+| вносит вклад | помогает, делает |
+
+### Наречия-паразиты (удалять или заменять)
+- "действительно", "просто", "буквально", "искренне", "абсолютно"
+- "глубоко", "поистине", "фундаментально", "неизбежно", "кардинально"
+- "чрезвычайно", "безусловно", "неотъемлемо"
+
+### Лексика ИИ на русском (ChatGPT-маркеры)
+- "Полотно", "Мозаика" (перевод AI-слова "tapestry")
+- "Сфера", "Ландшафт" в переносном значении ("в сфере маркетинга", "в финансовом ландшафте")
+- "Трансформация", "Инновация", "Интеграция", "Оптимизация" — чрезмерное использование отглагольных существительных; описывайте конкретное действие глаголом
+- "Углубиться в", "Свидетельствовать о", "Отправиться в путешествие"
+- "Причудливый", "Виртуозный", "Симфония" — неуместные музыкальные/художественные метафоры
+
+### Высокопарные обобщения (удалять и заменять конкретикой)
+- "Причины носят структурный характер."
+- "Последствия могут быть значительными."
+- "Ставки высоки."
+- "Будущее выглядит многообещающим."
+
+---
+
+## 6. Humanization Process (Процесс очеловечивания текста)
+
+When given text to humanize or rewrite:
+
+1. **Анализ** — найти все паттерны из разделов 4 и 5
+2. **Удаление** — убрать вводные пустышки, канцелярит, наречия-паразиты
+3. **Перестройка** — разрушить искусственную структуру (правило трёх, бинарные противопоставления, списки)
+4. **Конкретизация** — заменить абстракции конкретными фактами, цифрами, именами
+5. **Оживление** — варьировать ритм предложений, добавить связность между абзацами
+6. **Проверка** — перечитать результат вслух, убедиться, что текст звучит естественно и академично
+
+### Full Example (Полный пример)
+
+**Было (ИИ):**
+> Важно отметить, что в современном быстро меняющемся мире интеграция нейросетей в бизнес-процессы выступает в роли ключевого драйвера инноваций. Честно говоря, это не просто технологический сдвиг, это полная смена парадигмы.
+
+**Стало (человек):**
+> Нейросети помогают бизнесу работать быстрее и экономить деньги. Компании, которые их внедряют, получают серьезное преимущество.
+
+*Что изменилось:* Удалены вводные маркеры ("важно отметить", "честно говоря", "в современном мире"). Канцелярит ("выступает в роли", "смена парадигмы") заменен на конкретную пользу. Убрано бинарное клише ("это не просто X, это Y").
+
+**Было (ИИ):**
+> Этот грандиозный проект оставил неизгладимый след в истории города. Это симфония стекла и бетона. Жители получили комфортные, надежные и современные квартиры, а район стал настоящим оазисом на фоне урбанистического ландшафта.
+
+**Стало (человек):**
+> Проект сильно изменил облик города. Вместо старых промзон появились новые жилые кварталы из стекла и бетона, и люди смогли въехать в комфортные квартиры.
+
+*Что изменилось:* Убран рекламный пафос ("оставил неизгладимый след", "грандиозный", "оазис"). Разбито «правило трех» ("комфортные, надежные и современные"). Слово "симфония" (типичный маркер ChatGPT) заменено на простое описание.
+
+**Было (ИИ):**
+> Как мы уже видели в предыдущих разделах, оптимизация процессов непременно ведет к успеху. Подводя итог всему вышесказанному, можно с уверенностью утверждать: будущее выглядит многообещающим.
+
+**Стало (человек):**
+> Оптимизация процессов сокращает издержки на 15–20% в первый год. Если компания сохранит эти темпы, она сможет открыть новые направления в следующем квартале.
+
+*Что изменилось:* Удалены метакомментарии. Невнятные прогнозы заменены на конкретные цифры.
+
+---
+
+## 7. Tables, Figures, and Visual Elements
 
 ### Rules
 - Every chapter and subsection should contain at least one table or figure
@@ -115,7 +321,7 @@ Each paragraph's conclusion should bridge to the next paragraph's topic. Example
 
 ---
 
-## 4. Citation and Bibliography (ГОСТ Р 7.0.100-2018)
+## 8. Citation and Bibliography (ГОСТ Р 7.0.100-2018)
 
 ### In-Text Citations
 Use square brackets: [1, с. 45] or [1; 2; 5]
@@ -157,7 +363,7 @@ Use square brackets: [1, с. 45] or [1; 2; 5]
 
 ---
 
-## 5. Formatting Standards (ГОСТ 7.32-2017)
+## 9. Formatting Standards (ГОСТ 7.32-2017)
 
 | Parameter | Value |
 |-----------|-------|
@@ -173,13 +379,13 @@ Use square brackets: [1, с. 45] or [1; 2; 5]
 
 ---
 
-## 6. Paraphrasing Technique (Парафразирование)
+## 10. Paraphrasing Technique (Парафразирование)
 
 When rewriting text from sources to make it original:
 
 1. **Read and understand** the source paragraph fully
 2. **Close the source** and write the idea in your own words
-3. **Change the sentence structure**: active → passive, simple → complex, or vice versa
+3. **Change the sentence structure**: active to passive, simple to complex, or vice versa
 4. **Replace key terms with synonyms** where appropriate (but keep standard terminology)
 5. **Add your analytical commentary** — this is what makes text original
 6. **Cite the source** even after paraphrasing: [1, с. 34]
@@ -191,7 +397,32 @@ When rewriting text from sources to make it original:
 
 ---
 
-## 7. Chapter-by-Chapter Writing Checklist
+## 11. Anti-Slop System Prompt (Системный промпт)
+
+When generating Russian academic text, internally apply this constraint:
+
+```
+СТРОГО ЗАПРЕЩАЕТСЯ:
+1. Вводные штампы: "важно отметить", "стоит подчеркнуть", "нельзя не упомянуть",
+   "в современном мире", "в быстро меняющемся мире".
+2. Отглагольные существительные-абстракции: "инновация", "интеграция", "оптимизация",
+   "модернизация" — описывайте конкретное действие глаголом.
+3. Метафоры-клише ChatGPT: "полотно", "мозаика", "симфония", "оазис", "виртуозный".
+4. «Правило трех»: избегайте перечислений из трех однородных прилагательных.
+   Выберите одно самое важное или опишите фактом.
+5. Бинарные клише: "Это не просто X, это Y", "С одной стороны... с другой...".
+6. Канцелярит: замените "выступает в роли", "является свидетельством", "вносит вклад"
+   на активные глаголы.
+
+Принципы:
+- Активный залог. Субъект совершает действие.
+- Вырезайте половину прилагательных и наречий. Текст должен быть плотным.
+- Конкретика вместо абстракций.
+```
+
+---
+
+## 12. Chapter-by-Chapter Writing Checklist
 
 ### Before Writing
 - [ ] Determine the topic, purpose, and 4–6 objectives
@@ -223,19 +454,21 @@ When rewriting text from sources to make it original:
 - [ ] Conclusion summarizes findings from each chapter in 8+ points
 - [ ] Verify that stated objectives match actual content
 
-### Final Check
+### Final Quality Check
 - [ ] All tables and figures have analysis text (5–7 sentences each)
 - [ ] No bulleted lists in the main text — convert to prose or tables
 - [ ] Paragraph transitions are smooth (each ending connects to the next topic)
 - [ ] No redundant double qualifiers
-- [ ] Varied sentence structure (no repetitive patterns)
+- [ ] Varied sentence structure and paragraph length (no repetitive patterns)
+- [ ] No AI-markers from Section 4 and 5 (run mental anti-slop scan)
 - [ ] All sources in bibliography are cited in text, and vice versa
-- [ ] Formatting matches ГОСТ requirements
+- [ ] Typography rules from Section 2 applied (quotes, dashes, NBSP)
+- [ ] Formatting matches ГОСТ requirements (Section 9)
 - [ ] Page count meets requirements (typically 30–40 pages for main text)
 
 ---
 
-## 8. Useful Academic Phrases (Клише научного стиля)
+## 13. Useful Academic Phrases (Клише научного стиля)
 
 ### Introduction
 - "Актуальность исследования обусловлена..."
@@ -270,7 +503,7 @@ When rewriting text from sources to make it original:
 
 ---
 
-## 9. Quick Reference: Coursework for РЭУ им. Г.В. Плеханова
+## 14. Quick Reference: Coursework for РЭУ им. Г.В. Плеханова
 
 Based on the methodology guidelines from the Department of Innovation and Industrial Policy Management:
 
@@ -281,3 +514,14 @@ Based on the methodology guidelines from the Department of Innovation and Indust
 - **Key requirement:** Each table and figure MUST be followed by analytical commentary
 - **Analysis tools:** Use mixed format — not just one SWOT, combine with PEST, BCG, financial analysis
 - **Chapter 3:** Must connect back to problems identified in Chapter 2 with specific, costed proposals
+
+---
+
+## Credits
+
+This skill integrates knowledge from:
+- University methodology guidelines (РЭУ им. Г.В. Плеханова)
+- ГОСТ 7.32-2017, ГОСТ Р 7.0.100-2018
+- [Humanizer](https://github.com/blader/humanizer) by blader (MIT License) — based on Wikipedia's "Signs of AI writing"
+- [Russian Humanizer](https://openclaw.org) — Russian-specific AI-slop detection and removal
+- [ru-text](https://ru-text.org) by Arseniy Kamyshev — Russian text quality reference
