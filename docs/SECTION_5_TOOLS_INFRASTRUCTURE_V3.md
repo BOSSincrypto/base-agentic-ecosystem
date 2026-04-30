@@ -127,7 +127,7 @@ Coinbase CDP Facilitator (`0xDbDf3D8ED80f84c35d01c6C9F9271761BAd90Ba6`) — од
 > "@Hempanda: но есть и хорошие новости — я нашёл транзы х402 тру агентика на СоС" — 29.04, 17:18
 
 **PayTo address:** `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d`
-- 68 транзакций
+- 84 транзакций
 - $21,582 USDC баланс
 - Funded by Binance (1 yr 288 days ago)
 - Реальные x402 агентские платежи!
@@ -261,7 +261,7 @@ Coinbase CDP Facilitator (`0xDbDf3D8ED80f84c35d01c6C9F9271761BAd90Ba6`) — од
 | **Floe Labs** | 🟡 Слабые метрики | Facilitator `0x58edde02...` (8 txs, $327). FLOE token = РАГПУЛЛ ❌ | [7397253](https://dune.com/queries/7397253) |
 | **Agently** | 📊 Off-chain data | ~2K реальных агентов (не 7770). Нет ончейн контракта | [7401373](https://dune.com/queries/7401373/11337310) |
 | **4mica** | ❌ Нет данных | Токены на Base — СКАМ. Реальный контракт не найден | — |
-| **Clash of Coins x402** | 🟢 Реальная активность! | PayTo: `0x8b29DABD...` (68 txs, $21.5K USDC) — настоящие x402 платежи | [7400157](https://dune.com/queries/7400157/11335903) |
+| **Clash of Coins x402** | 🟢 Реальная активность! | PayTo: `0x8b29DABD...` (84 txs, $21.5K USDC) — настоящие x402 платежи | [7400157](https://dune.com/queries/7400157/11335903) |
 
 ---
 
@@ -400,7 +400,7 @@ Structured credit DEX на Base. P2P intent-matching протокол для к�
 | **Тип** | x402 Agent Payments (в рамках Clash of Coins) |
 | **x402 Shop** | https://x402.clashofcoins.com/shop/x402/offers |
 | **PayTo Address** | `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d` |
-| **Транзакций** | 68 |
+| **Транзакций** | 84 |
 | **USDC баланс** | $21,582 |
 | **Funded by** | Binance (1 yr 288 days ago) |
 | **Dune query** | https://dune.com/queries/7400157/11335903 (@Hempanda) |
@@ -448,7 +448,7 @@ https://basescan.org/tx/0xf25dbc071b31bd21c5b11224441f8a9568d6a24742af4875d085e2
 |---------|---------|---------|------|--------|--------|
 | **BlockRunAI** | `0xe9030014F5DAe217d0A152f02A043567b16c1aBf` | Base Mainnet | Wallet (USDC payments) | ⚠️ **UNCONFIRMED** | @Hempanda OSINT |
 | **Floe Labs** (facilitator) | `0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1` | Base Mainnet | Lending facilitator | 🟡 Active (8 txs) | @Hempanda |
-| **Clash of Coins x402** (payTo) | `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d` | Base Mainnet | x402 agent payments | 🟢 **Active** (68 txs) | @Hempanda |
+| **Clash of Coins x402** (payTo) | `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d` | Base Mainnet | x402 agent payments | 🟢 **Active** (84 txs) | @Hempanda |
 | ERC-8004 Registry | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` | Base Mainnet | Identity Registry | Active (shared) | Dashboard V1 |
 | x402 Facilitator (Coinbase) | `0xDbDf3D8ED80f84c35d01c6C9F9271761BAd90Ba6` | Base Mainnet | x402 verification | Active (один из многих) | BaseScan |
 | **~~FLOE Token~~** | ~~`0xA2CBA6b88D86cC2F7469BbEabDd6b4A63c60f75e`~~ | — | — | ❌ **РАГПУЛЛ** | @Hempanda |
@@ -555,7 +555,7 @@ Real x402 agent payment activity discovered on Base. Agents pay for in-game item
 |-----------|---|
 | **Protocol** | x402 (HTTP-native payments) |
 | **PayTo Address** | [`0x8b29DABD...`](https://basescan.org/address/0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d) |
-| **Transactions** | 68 txs, $21.5K USDC |
+| **Transactions** | 84 txs, $21.5K USDC |
 | **x402 Shop** | [x402.clashofcoins.com/shop/x402/offers](https://x402.clashofcoins.com/shop/x402/offers) |
 | **Status** | **Live — real agent x402 payments** |
 
@@ -572,150 +572,178 @@ Real x402 agent payment activity discovered on Base. Agents pay for in-game item
 
 ---
 
-### QUERY 5.1: BlockRunAI — On-chain Activity
+### QUERY 5.1: Tools & Infra — Combined On-chain Activity
 
-> **ГОТОВЫЙ QUERY ОТ @HEMPANDA:** https://dune.com/queries/7396448/
-> Рекомендуется использовать query @Hempanda напрямую (он уже протестирован и содержит правильные адреса).
+> **ОСНОВНОЙ QUERY.** Заменяет старый Query 5.1 (который использовал СКАМ-токены и нерабочий x402 Facilitator).
+> Также можно использовать готовые queries @Hempanda по отдельным проектам:
+> - BlockRunAI: https://dune.com/queries/7396448/
+> - Floe Labs: https://dune.com/queries/7397253
+> - CoC x402: https://dune.com/queries/7400157/11335903
 
 #### Что он делает
-Трекает активность контракта BlockRunAI на Base: транзакции, USDC потоки, уникальные адреса.
+Объединённый запрос по ВСЕМ проектам секции с ончейн-данными. Использует **только верифицированные адреса** от @Hempanda. Показывает сводку по каждому проекту: транзакции, уникальные адреса, USDC объём.
+
+#### Почему старый Query 5.1 не работал
+
+| Проблема | Причина | Исправление |
+|----------|---------|-------------|
+| x402 Facilitator Txs = **0** | Coinbase facilitator `0xDbDf...` не получает прямых транзакций в `base.transactions`. Фасилитаторы вызываются через internal calls / другие контракты | **УБРАН** из query |
+| Token DEX Volume = **$20K** | Использовались СКАМ-токены: FLOE `0xA2CBA6...` (рагпулл) и 4MICA `0x33f2df...` (скам) | **УБРАНЫ** все скам-токены |
+| Project Contract Txs = **84** | Шли от старого Floe lending `0x17946c...`. Проверено — данные есть, но @Hempanda нашёл другой facilitator | Заменён на `0x58edde02...` |
+| BlockRunAI = **0** | Фильтр `>= DATE '2026-04-01'` отсекал всю активность (Feb-Mar 2026) | **УБРАН** фильтр по дате |
+| Floe txs пропущены | Старый query проверял только `t."to"`, но Floe facilitator **отправляет** транзы (7 из 8 — OUT) | Проверяем `FROM` **И** `TO` |
 
 #### На какие вопросы отвечает
-- Сколько транзакций у BlockRunAI контракта?
-- Какой объём USDC проходит через адрес?
+- Сколько транзакций у каждого проекта? (BlockRunAI ~155, CoC ~84, Floe ~8)
+- Какой объём USDC проходит? (BlockRunAI ~$12.6K, CoC ~$21.5K)
 - Сколько уникальных адресов взаимодействовали?
 
-#### ⚠️ ВАЖНО
-Контракт `0xe9030014F5DAe217d0A152f02A043567b16c1aBf` **не подтверждён** командой BlockRunAI. Данные могут быть неточными.
-
 #### Название запроса при сохранении
-`BlockRunAI - On-chain Activity (⚠️ Unconfirmed)`
+`Tools & Infra - Combined On-chain Activity (V3.2)`
 
-#### SQL-код (fallback — если query @Hempanda недоступен)
+#### SQL-код
 
 ```sql
--- BlockRunAI: On-chain Activity
--- ⚠️ Contract NOT CONFIRMED by BlockRunAI team
--- Address found via OSINT by @Hempanda (Apr 29, 2026)
--- Source: https://dune.com/queries/7396448/
+-- Tools & Infrastructure: Combined On-chain Activity (V3.2)
+-- ONLY verified addresses from @Hempanda research (Apr 28-30, 2026)
+--
+-- Addresses:
+--   BlockRunAI:  0xe9030014F5DAe217d0A152f02A043567b16c1aBf (⚠️ UNCONFIRMED)
+--   Floe Labs:   0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1 (facilitator)
+--   CoC x402:    0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d (payTo)
+--
+-- REMOVED (scams): FLOE token 0xA2CBA6..., 4MICA 0x33f2df..., 4MICA v1 0x231375...
+-- REMOVED: Coinbase x402 Facilitator 0xDbDf... (returns 0 — facilitators rotate)
+-- REMOVED: date filter (BlockRunAI activity is Feb-Mar 2026)
+--
+-- Checks BOTH t."from" AND t."to" (Floe sends txs OUT, not just receives)
 
-WITH blockrun_txs AS (
+WITH tool_contracts AS (
+    SELECT address, name FROM (
+        VALUES
+        -- BlockRunAI (⚠️ unconfirmed, found via OSINT by @Hempanda)
+        (0xe9030014F5DAe217d0A152f02A043567b16c1aBf, 'BlockRunAI'),
+        -- Floe Labs lending facilitator (real, accepts collateral)
+        (0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1, 'Floe Labs'),
+        -- Clash of Coins x402 payTo (real x402 agent payments)
+        (0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d, 'CoC x402')
+    ) AS t(address, name)
+),
+
+-- All transactions FROM or TO these addresses (no date filter!)
+tx_activity AS (
     SELECT
-        DATE_TRUNC('day', t.block_time) AS day,
-        COUNT(*) AS txs,
-        COUNT(DISTINCT t."from") AS unique_senders,
-        COUNT(DISTINCT t."to") AS unique_receivers
+        tc.name AS project,
+        COUNT(*) AS total_txs,
+        COUNT(DISTINCT CASE
+            WHEN t."from" = tc.address THEN t."to"
+            ELSE t."from"
+        END) AS unique_counterparties,
+        MIN(t.block_time) AS first_tx,
+        MAX(t.block_time) AS last_tx
     FROM base.transactions t
-    WHERE (t."from" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf
-        OR t."to" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf)
-      AND t.success = true
+    INNER JOIN tool_contracts tc
+        ON t."from" = tc.address OR t."to" = tc.address
+    WHERE t.success = true
     GROUP BY 1
 ),
 
--- USDC transfers involving BlockRunAI address
-usdc_flows AS (
+-- USDC transfers (ERC-20) involving these addresses
+usdc_activity AS (
     SELECT
-        DATE_TRUNC('day', evt_block_time) AS day,
-        SUM(CASE
-            WHEN "to" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf
-            THEN CAST(value AS DOUBLE) / 1e6
-            ELSE 0
-        END) AS usdc_in,
-        SUM(CASE
-            WHEN "from" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf
-            THEN CAST(value AS DOUBLE) / 1e6
-            ELSE 0
-        END) AS usdc_out
-    FROM erc20_base.evt_Transfer
-    WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913  -- USDC on Base
-      AND (
-          "from" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf
-          OR "to" = 0xe9030014F5DAe217d0A152f02A043567b16c1aBf
-      )
+        tc.name AS project,
+        ROUND(SUM(CAST(tr.value AS DOUBLE) / 1e6), 2) AS usdc_volume,
+        COUNT(*) AS usdc_transfers,
+        COUNT(DISTINCT CASE
+            WHEN tr."from" = tc.address THEN tr."to"
+            ELSE tr."from"
+        END) AS usdc_counterparties
+    FROM erc20_base.evt_Transfer tr
+    INNER JOIN tool_contracts tc
+        ON tr."from" = tc.address OR tr."to" = tc.address
+    WHERE tr.contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913  -- USDC on Base
     GROUP BY 1
 )
 
 SELECT
-    COALESCE(b.day, u.day) AS day,
-    COALESCE(b.txs, 0) AS "Daily Txs",
-    COALESCE(b.unique_senders, 0) AS "Unique Senders",
-    ROUND(COALESCE(u.usdc_in, 0), 2) AS "USDC In",
-    ROUND(COALESCE(u.usdc_out, 0), 2) AS "USDC Out",
-    SUM(COALESCE(b.txs, 0)) OVER (ORDER BY COALESCE(b.day, u.day)) AS "Cumulative Txs"
-FROM blockrun_txs b
-FULL OUTER JOIN usdc_flows u ON b.day = u.day
-ORDER BY 1
+    t.project AS "Project",
+    t.total_txs AS "Total Txs",
+    t.unique_counterparties AS "Unique Addresses",
+    COALESCE(u.usdc_volume, 0) AS "USDC Volume (USD)",
+    COALESCE(u.usdc_transfers, 0) AS "USDC Transfers",
+    t.first_tx AS "First Activity",
+    t.last_tx AS "Last Activity"
+FROM tx_activity t
+LEFT JOIN usdc_activity u ON t.project = u.project
+ORDER BY t.total_txs DESC
 ```
+
+**Ожидаемые результаты (на основе BaseScan, 30.04.2026):**
+
+| Project | Total Txs | Unique Addresses | USDC Volume | First Activity | Last Activity |
+|---------|-----------|-----------------|-------------|----------------|---------------|
+| BlockRunAI | ~155 | ? | ~$12,600 | Feb 12, 2026 | Mar 11, 2026 |
+| CoC x402 | ~84 | ? | ~$21,500 | ~Jun 2024 | ~Feb 2026 |
+| Floe Labs | ~8 | ~2 | ~$0 (uses WETH/cbBTC) | Mar 9, 2026 | Apr 29, 2026 |
+| **ИТОГО** | **~247** | — | **~$34,100** | — | — |
+
+**Примечания:**
+- BlockRunAI контракт ⚠️ НЕ ПОДТВЕРЖДЁН — данные могут измениться
+- Floe Labs USDC Volume = 0 потому что они используют WETH и cbBTC как залог, не USDC
+- CoC x402 — самый активный по USDC объёму ($21.5K)
+- Нет фильтра по дате — показывает ВСЮ историю
 
 ---
 
-### QUERY 5.2: Floe Labs — Lending Activity
-
-> **ГОТОВЫЙ QUERY ОТ @HEMPANDA:** https://dune.com/queries/7397253
-> Рекомендуется использовать query @Hempanda напрямую.
+### QUERY 5.2: Tools & Infra — Daily Activity Trend
 
 #### Что он делает
-Трекает активность Floe Labs facilitator на Base: транзакции по кредитам, залоги, уникальные адреса.
-
-#### На какие вопросы отвечает
-- Сколько кредитов выдано/возвращено?
-- Какой объём залогов?
-- Сколько уникальных borrowers?
+Дневная разбивка активности по каждому проекту. Для графиков (stacked bar chart).
 
 #### Название запроса при сохранении
-`Floe Labs - Lending Activity (Facilitator)`
+`Tools & Infra - Daily Activity Trend (V3.2)`
 
-#### SQL-код (fallback)
+#### SQL-код
 
 ```sql
--- Floe Labs: Lending Activity
--- Facilitator: 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1
--- Source: https://dune.com/queries/7397253 (@Hempanda)
--- Note: Metrics very weak — 4 unique addresses, ~$20 in loans, ~$13 in collateral
+-- Tools & Infrastructure: Daily Activity Trend (V3.2)
+-- Same verified addresses as Query 5.1, daily breakdown for charts
+-- Checks BOTH "from" AND "to" directions
 
-WITH floe_txs AS (
-    SELECT
-        DATE_TRUNC('day', t.block_time) AS day,
-        COUNT(*) AS txs,
-        COUNT(DISTINCT t."from") AS unique_users
-    FROM base.transactions t
-    WHERE (t."from" = 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1
-        OR t."to" = 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1)
-      AND t.success = true
-    GROUP BY 1
-),
-
--- Token transfers (WETH, cbBTC, USDT) involving Floe facilitator
-collateral_flows AS (
-    SELECT
-        DATE_TRUNC('day', evt_block_time) AS day,
-        COUNT(*) AS token_transfers,
-        COUNT(DISTINCT "from") AS unique_depositors
-    FROM erc20_base.evt_Transfer
-    WHERE (
-        "from" = 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1
-        OR "to" = 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1
-    )
-    GROUP BY 1
+WITH tool_contracts AS (
+    SELECT address, name FROM (
+        VALUES
+        (0xe9030014F5DAe217d0A152f02A043567b16c1aBf, 'BlockRunAI'),
+        (0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1, 'Floe Labs'),
+        (0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d, 'CoC x402')
+    ) AS t(address, name)
 )
 
 SELECT
-    COALESCE(f.day, c.day) AS day,
-    COALESCE(f.txs, 0) AS "Daily Txs",
-    COALESCE(f.unique_users, 0) AS "Unique Users",
-    COALESCE(c.token_transfers, 0) AS "Token Transfers",
-    COALESCE(c.unique_depositors, 0) AS "Unique Depositors"
-FROM floe_txs f
-FULL OUTER JOIN collateral_flows c ON f.day = c.day
-ORDER BY 1
+    DATE_TRUNC('day', t.block_time) AS day,
+    tc.name AS project,
+    COUNT(*) AS txs,
+    COUNT(DISTINCT CASE
+        WHEN t."from" = tc.address THEN t."to"
+        ELSE t."from"
+    END) AS unique_addresses
+FROM base.transactions t
+INNER JOIN tool_contracts tc
+    ON t."from" = tc.address OR t."to" = tc.address
+WHERE t.success = true
+GROUP BY 1, 2
+ORDER BY 1, 2
 ```
+
+**Визуализация:** Stacked bar chart по проектам (день → транзакции, цвет = проект).
 
 ---
 
 ### QUERY 5.3: Agently — Off-chain Agent Catalog
 
 > **ГОТОВЫЙ QUERY ОТ @HEMPANDA:** https://dune.com/queries/7401373/11337310
-> Рекомендуется использовать query @Hempanda напрямую (содержит off-chain данные, загруженные как constants).
+> Использовать query @Hempanda напрямую (содержит off-chain данные, загруженные как constants).
+> SQL-код не приводится — данные off-chain, структура query специфична для выгрузки @Hempanda.
 
 #### Что он делает
 Показывает каталог агентов Agently: распределение по chain, тип, вид. Данные off-chain — извлечены из маркетплейса.
@@ -736,114 +764,67 @@ ORDER BY 1
 
 ---
 
-### QUERY 5.4: Clash of Coins — x402 Agent Payments
+### ~~QUERY 5.2 (СТАРЫЙ): x402 Facilitator — Protocol Pulse~~ ❌ УДАЛЁН
 
-> **ГОТОВЫЙ QUERY ОТ @HEMPANDA:** https://dune.com/queries/7400157/11335903
-> Рекомендуется использовать query @Hempanda напрямую.
-
-#### Что он делает
-Трекает реальные x402 агентские платежи в экосистеме Clash of Coins. Агенты платят за items/services через x402 протокол на PayTo адрес.
-
-#### На какие вопросы отвечает
-- Сколько x402 платежей прошло через Clash of Coins?
-- Какой объём USDC?
-- Сколько уникальных агентов платят?
-
-#### Название запроса при сохранении
-`Clash of Coins - x402 Agent Payments`
-
-#### SQL-код (fallback)
-
-```sql
--- Clash of Coins: x402 Agent Payments
--- PayTo address: 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
--- Source: https://dune.com/queries/7400157/11335903 (@Hempanda)
--- Logic: x402 shop at https://x402.clashofcoins.com/shop/x402/offers
--- agents pay USDC to this address per x402 protocol
-
-WITH coc_x402_txs AS (
-    SELECT
-        DATE_TRUNC('day', t.block_time) AS day,
-        COUNT(*) AS txs,
-        COUNT(DISTINCT t."from") AS unique_payers
-    FROM base.transactions t
-    WHERE t."to" = 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
-      AND t.success = true
-    GROUP BY 1
-),
-
--- USDC payments to CoC x402 address
-usdc_payments AS (
-    SELECT
-        DATE_TRUNC('day', evt_block_time) AS day,
-        SUM(CAST(value AS DOUBLE) / 1e6) AS usdc_volume,
-        COUNT(*) AS usdc_txs,
-        COUNT(DISTINCT "from") AS unique_usdc_payers
-    FROM erc20_base.evt_Transfer
-    WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913  -- USDC on Base
-      AND "to" = 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
-    GROUP BY 1
-)
-
-SELECT
-    COALESCE(c.day, u.day) AS day,
-    COALESCE(c.txs, 0) AS "Daily Txs",
-    COALESCE(c.unique_payers, 0) AS "Unique Payers",
-    ROUND(COALESCE(u.usdc_volume, 0), 2) AS "USDC Volume",
-    COALESCE(u.usdc_txs, 0) AS "USDC Payments",
-    SUM(ROUND(COALESCE(u.usdc_volume, 0), 2)) OVER (ORDER BY COALESCE(c.day, u.day)) AS "Cumulative USDC"
-FROM coc_x402_txs c
-FULL OUTER JOIN usdc_payments u ON c.day = u.day
-ORDER BY 1
-```
+> **ПОЛНОСТЬЮ УДАЛЁН.** Старый query использовал Coinbase x402 Facilitator `0xDbDf3D8ED80f84c35d01c6C9F9271761BAd90Ba6` и возвращал **пустой результат**.
+>
+> **Причина:** x402 facilitators на Base ротируются и их много (@Hempanda, 28.04). Coinbase facilitator не получает прямых транзакций через `base.transactions` — он вызывается через internal calls.
+>
+> **Замена:** Вместо трекинга абстрактного facilitator, трекаем конкретные payTo-адреса проектов (CoC x402 `0x8b29DABD...`). Это даёт реальные данные.
 
 ---
 
 ### Визуализации
 
-#### Каунтеры (РЯД S5-2)
+#### Каунтеры (РЯД S5-2) — из Query 5.1
 
-| # | Заголовок | Источник | Формат | Цвет | Ширина |
-|---|-----------|----------|--------|------|--------|
-| 1 | **BlockRunAI Txs ⚠️** | Query 5.1 (SUM of Daily Txs) | Number | Teal `#14B8A6` | 4 кол. |
-| 2 | **Floe Labs Txs** | Query 5.2 (SUM of Daily Txs) | Number | Sky `#0EA5E9` | 4 кол. |
-| 3 | **CoC x402 USDC** | Query 5.4 (SUM of USDC Volume) | Dollar | Amber `#F59E0B` | 4 кол. |
+Из результатов Query 5.1 создать 3 counter-визуализации (по строкам таблицы):
 
-#### Chart: BlockRunAI Activity (РЯД S5-3)
+| # | Заголовок | Строка Query 5.1 | Колонка | Формат | Цвет | Ширина |
+|---|-----------|-------------------|---------|--------|------|--------|
+| 1 | **BlockRunAI Txs ⚠️** | row where Project = 'BlockRunAI' | `Total Txs` | Number | Teal `#14B8A6` | 4 кол. |
+| 2 | **CoC x402 USDC** | row where Project = 'CoC x402' | `USDC Volume (USD)` | Dollar | Amber `#F59E0B` | 4 кол. |
+| 3 | **Total Unique Addresses** | SUM всех строк | `Unique Addresses` | Number | Indigo `#6366F1` | 4 кол. |
 
-Из Query 5.1 — full-width chart:
+> Альтернатива: создать отдельный counter query с `SUM()` по всем строкам.
 
-| Настройка | Значение |
-|-----------|----------|
-| **Тип** | Mixed (bar + line) |
-| **Ширина** | 12 колонок |
-| **Заголовок** | `BlockRunAI: On-chain Activity (⚠️ Unconfirmed Contract)` |
-| **X-axis** | `day` |
-| **Bars (left)** | `Daily Txs` (Teal `#14B8A6`) |
-| **Line (right)** | `Cumulative Txs` (Dark Teal `#0F766E`) |
-| **Additional** | `USDC In` (Green `#10B981`), `USDC Out` (Red `#EF4444`) |
+#### Таблица: Project Summary (РЯД S5-3)
 
-#### Chart: CoC x402 Agent Payments (РЯД S5-4)
-
-Из Query 5.4 — full-width chart:
+Из Query 5.1 — full-width table:
 
 | Настройка | Значение |
 |-----------|----------|
-| **Тип** | Mixed (bar + line) |
+| **Тип** | Table |
 | **Ширина** | 12 колонок |
-| **Заголовок** | `Clash of Coins: x402 Agent Payments (Real Activity)` |
+| **Заголовок** | `Tools & Infra: On-chain Summary (Verified Addresses Only)` |
+| **Колонки** | Project, Total Txs, Unique Addresses, USDC Volume (USD), First Activity, Last Activity |
+| **Сортировка** | По Total Txs DESC |
+
+#### Chart: Daily Activity by Project (РЯД S5-4)
+
+Из Query 5.2 — full-width stacked bar chart:
+
+| Настройка | Значение |
+|-----------|----------|
+| **Тип** | Stacked Bar |
+| **Ширина** | 12 колонок |
+| **Заголовок** | `Tools & Infra: Daily Transaction Activity` |
 | **X-axis** | `day` |
-| **Bars (left)** | `USDC Volume` (Amber `#F59E0B`) |
-| **Line (right)** | `Cumulative USDC` (Dark Amber `#B45309`) |
-| **Additional** | `Unique Payers` (Teal `#14B8A6`, dashed) |
+| **Y-axis** | `txs` |
+| **Stack by** | `project` |
+| **Цвета** | BlockRunAI = Teal `#14B8A6`, Floe Labs = Sky `#0EA5E9`, CoC x402 = Amber `#F59E0B` |
+| **Не использовать** | Log scale |
 
-#### Tables (РЯД S5-5)
+#### Table: Agently Catalog (РЯД S5-5)
 
-**Left (6 cols): Agently Agent Catalog**
-Из Query 5.3 — таблица каталога агентов по chain/type.
+Из Query 5.3 (@Hempanda) — 12 колонок:
 
-**Right (6 cols): Floe Labs Summary**
-Из Query 5.2 — таблица с суммарными метриками.
+| Настройка | Значение |
+|-----------|----------|
+| **Тип** | Table |
+| **Ширина** | 12 колонок |
+| **Заголовок** | `Agently: Agent Catalog (~2K real agents, off-chain)` |
+| **Source** | https://dune.com/queries/7401373/11337310 |
 
 ---
 
@@ -893,7 +874,7 @@ ORDER BY 1
 | Floe Labs | Structured credit protocol for agents | 🟡 Facilitator active (weak metrics) |
 | Agently | Agent marketplace + routing layer (A2A, MCP) | 📊 Off-chain data only (~2K agents) |
 | 4mica | Instant credit tabs (x402 facilitator) | ❌ No verified contract |
-| Clash of Coins x402 | Real x402 agent payments | 🟢 Active (68 txs, $21.5K USDC) |
+| Clash of Coins x402 | Real x402 agent payments | 🟢 Active (84 txs, $21.5K USDC) |
 
 **Verified Contracts:**
 - BlockRunAI: `0xe9030014F5DAe217d0A152f02A043567b16c1aBf` — ⚠️ UNCONFIRMED (found via OSINT)
