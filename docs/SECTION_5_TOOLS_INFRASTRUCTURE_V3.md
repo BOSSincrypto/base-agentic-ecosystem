@@ -604,8 +604,12 @@ Real x402 agent payment activity discovered on Base. Agents pay for in-game item
 #### SQL-код
 
 ```sql
--- Tools & Infrastructure: Combined On-chain Activity (V3.2)
+-- Tools & Infrastructure: Combined On-chain Activity (V3.3 OPTIMIZED)
 -- ONLY verified addresses from @Hempanda research (Apr 28-30, 2026)
+--
+-- OPTIMIZATION: Uses UNION ALL instead of OR join (Dune pushes down predicates
+-- per branch → avoids full table scan of base.transactions).
+-- Date filter >= 2024-01-01 covers all projects (CoC earliest ~Jun 2024).
 --
 -- Addresses:
 --   BlockRunAI:  0xe9030014F5DAe217d0A152f02A043567b16c1aBf (⚠️ UNCONFIRMED)
@@ -614,57 +618,123 @@ Real x402 agent payment activity discovered on Base. Agents pay for in-game item
 --
 -- REMOVED (scams): FLOE token 0xA2CBA6..., 4MICA 0x33f2df..., 4MICA v1 0x231375...
 -- REMOVED: Coinbase x402 Facilitator 0xDbDf... (returns 0 — facilitators rotate)
--- REMOVED: date filter (BlockRunAI activity is Feb-Mar 2026)
---
--- Checks BOTH t."from" AND t."to" (Floe sends txs OUT, not just receives)
 
-WITH tool_contracts AS (
-    SELECT address, name FROM (
-        VALUES
-        -- BlockRunAI (⚠️ unconfirmed, found via OSINT by @Hempanda)
-        (0xe9030014F5DAe217d0A152f02A043567b16c1aBf, 'BlockRunAI'),
-        -- Floe Labs lending facilitator (real, accepts collateral)
-        (0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1, 'Floe Labs'),
-        -- Clash of Coins x402 payTo (real x402 agent payments)
-        (0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d, 'CoC x402')
-    ) AS t(address, name)
+-- Step 1: Collect all txs FROM these addresses
+WITH txs_from AS (
+    SELECT
+        t."from" AS contract_addr,
+        t."to" AS counterparty,
+        t.block_time
+    FROM base.transactions t
+    WHERE t."from" IN (
+        0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+        0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+        0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+    )
+      AND t.success = true
+      AND t.block_time >= DATE '2024-01-01'
 ),
 
--- All transactions FROM or TO these addresses (no date filter!)
+-- Step 2: Collect all txs TO these addresses
+txs_to AS (
+    SELECT
+        t."to" AS contract_addr,
+        t."from" AS counterparty,
+        t.block_time
+    FROM base.transactions t
+    WHERE t."to" IN (
+        0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+        0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+        0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+    )
+      AND t.success = true
+      AND t.block_time >= DATE '2024-01-01'
+),
+
+-- Step 3: Combine both directions
+all_txs AS (
+    SELECT * FROM txs_from
+    UNION ALL
+    SELECT * FROM txs_to
+),
+
+-- Step 4: Label projects
+labeled AS (
+    SELECT
+        CASE contract_addr
+            WHEN 0xe9030014F5DAe217d0A152f02A043567b16c1aBf THEN 'BlockRunAI'
+            WHEN 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1 THEN 'Floe Labs'
+            WHEN 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d THEN 'CoC x402'
+        END AS project,
+        counterparty,
+        block_time
+    FROM all_txs
+),
+
+-- Step 5: Aggregate per project
 tx_activity AS (
     SELECT
-        tc.name AS project,
+        project,
         COUNT(*) AS total_txs,
-        COUNT(DISTINCT CASE
-            WHEN t."from" = tc.address THEN t."to"
-            ELSE t."from"
-        END) AS unique_counterparties,
-        MIN(t.block_time) AS first_tx,
-        MAX(t.block_time) AS last_tx
-    FROM base.transactions t
-    INNER JOIN tool_contracts tc
-        ON t."from" = tc.address OR t."to" = tc.address
-    WHERE t.success = true
+        COUNT(DISTINCT counterparty) AS unique_counterparties,
+        MIN(block_time) AS first_tx,
+        MAX(block_time) AS last_tx
+    FROM labeled
     GROUP BY 1
 ),
 
--- USDC transfers (ERC-20) involving these addresses
+-- Step 6: USDC transfers (same UNION ALL pattern)
+usdc_from AS (
+    SELECT
+        tr."from" AS contract_addr,
+        tr."to" AS counterparty,
+        CAST(tr.value AS DOUBLE) / 1e6 AS usdc_amount
+    FROM erc20_base.evt_Transfer tr
+    WHERE tr.contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+      AND tr."from" IN (
+          0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+          0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+          0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+      )
+      AND tr.evt_block_time >= DATE '2024-01-01'
+),
+
+usdc_to AS (
+    SELECT
+        tr."to" AS contract_addr,
+        tr."from" AS counterparty,
+        CAST(tr.value AS DOUBLE) / 1e6 AS usdc_amount
+    FROM erc20_base.evt_Transfer tr
+    WHERE tr.contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+      AND tr."to" IN (
+          0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+          0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+          0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+      )
+      AND tr.evt_block_time >= DATE '2024-01-01'
+),
+
+usdc_all AS (
+    SELECT * FROM usdc_from
+    UNION ALL
+    SELECT * FROM usdc_to
+),
+
 usdc_activity AS (
     SELECT
-        tc.name AS project,
-        ROUND(SUM(CAST(tr.value AS DOUBLE) / 1e6), 2) AS usdc_volume,
+        CASE contract_addr
+            WHEN 0xe9030014F5DAe217d0A152f02A043567b16c1aBf THEN 'BlockRunAI'
+            WHEN 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1 THEN 'Floe Labs'
+            WHEN 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d THEN 'CoC x402'
+        END AS project,
+        ROUND(SUM(usdc_amount), 2) AS usdc_volume,
         COUNT(*) AS usdc_transfers,
-        COUNT(DISTINCT CASE
-            WHEN tr."from" = tc.address THEN tr."to"
-            ELSE tr."from"
-        END) AS usdc_counterparties
-    FROM erc20_base.evt_Transfer tr
-    INNER JOIN tool_contracts tc
-        ON tr."from" = tc.address OR tr."to" = tc.address
-    WHERE tr.contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913  -- USDC on Base
+        COUNT(DISTINCT counterparty) AS usdc_counterparties
+    FROM usdc_all
     GROUP BY 1
 )
 
+-- Final: combine tx counts + USDC data
 SELECT
     t.project AS "Project",
     t.total_txs AS "Total Txs",
@@ -677,6 +747,11 @@ FROM tx_activity t
 LEFT JOIN usdc_activity u ON t.project = u.project
 ORDER BY t.total_txs DESC
 ```
+
+**Оптимизация (V3.3):**
+- `UNION ALL` вместо `OR` в JOIN — Dune pushes predicates per branch, избегая full table scan
+- Дата `>= 2024-01-01` — покрывает все проекты (CoC с ~Jun 2024), но отсекает ненужные годы
+- Если всё ещё слишком тяжёлый — можно сузить до `>= 2025-01-01` (потеряем ранний CoC)
 
 **Ожидаемые результаты (на основе BaseScan, 30.04.2026):**
 
@@ -691,7 +766,6 @@ ORDER BY t.total_txs DESC
 - BlockRunAI контракт ⚠️ НЕ ПОДТВЕРЖДЁН — данные могут измениться
 - Floe Labs USDC Volume = 0 потому что они используют WETH и cbBTC как залог, не USDC
 - CoC x402 — самый активный по USDC объёму ($21.5K)
-- Нет фильтра по дате — показывает ВСЮ историю
 
 ---
 
@@ -706,31 +780,59 @@ ORDER BY t.total_txs DESC
 #### SQL-код
 
 ```sql
--- Tools & Infrastructure: Daily Activity Trend (V3.2)
+-- Tools & Infrastructure: Daily Activity Trend (V3.3 OPTIMIZED)
 -- Same verified addresses as Query 5.1, daily breakdown for charts
--- Checks BOTH "from" AND "to" directions
+-- Uses UNION ALL instead of OR join for Dune performance
 
-WITH tool_contracts AS (
-    SELECT address, name FROM (
-        VALUES
-        (0xe9030014F5DAe217d0A152f02A043567b16c1aBf, 'BlockRunAI'),
-        (0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1, 'Floe Labs'),
-        (0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d, 'CoC x402')
-    ) AS t(address, name)
+-- Step 1: txs FROM these addresses
+WITH txs_from AS (
+    SELECT
+        t."from" AS contract_addr,
+        t."to" AS counterparty,
+        t.block_time
+    FROM base.transactions t
+    WHERE t."from" IN (
+        0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+        0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+        0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+    )
+      AND t.success = true
+      AND t.block_time >= DATE '2024-01-01'
+),
+
+-- Step 2: txs TO these addresses
+txs_to AS (
+    SELECT
+        t."to" AS contract_addr,
+        t."from" AS counterparty,
+        t.block_time
+    FROM base.transactions t
+    WHERE t."to" IN (
+        0xe9030014F5DAe217d0A152f02A043567b16c1aBf,
+        0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1,
+        0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d
+    )
+      AND t.success = true
+      AND t.block_time >= DATE '2024-01-01'
+),
+
+-- Step 3: Combine + label
+all_txs AS (
+    SELECT * FROM txs_from
+    UNION ALL
+    SELECT * FROM txs_to
 )
 
 SELECT
-    DATE_TRUNC('day', t.block_time) AS day,
-    tc.name AS project,
+    DATE_TRUNC('day', block_time) AS day,
+    CASE contract_addr
+        WHEN 0xe9030014F5DAe217d0A152f02A043567b16c1aBf THEN 'BlockRunAI'
+        WHEN 0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1 THEN 'Floe Labs'
+        WHEN 0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d THEN 'CoC x402'
+    END AS project,
     COUNT(*) AS txs,
-    COUNT(DISTINCT CASE
-        WHEN t."from" = tc.address THEN t."to"
-        ELSE t."from"
-    END) AS unique_addresses
-FROM base.transactions t
-INNER JOIN tool_contracts tc
-    ON t."from" = tc.address OR t."to" = tc.address
-WHERE t.success = true
+    COUNT(DISTINCT counterparty) AS unique_addresses
+FROM all_txs
 GROUP BY 1, 2
 ORDER BY 1, 2
 ```
