@@ -16,10 +16,12 @@
 5. [Query 5.1: Combined KPIs](#query-51-tools--infra--combined-kpis)
 6. [Query 5.2: Daily Activity Trend](#query-52-tools--infra--daily-activity-trend)
 7. [Query 5.3: CoC x402 Agentic Payments](#query-53-coc-x402--agentic-payments-deep-dive)
-8. [Визуализации и оформление](#визуализации-и-оформление)
-9. [Карта Layout](#карта-layout)
-10. [Цветовая палитра](#цветовая-палитра)
-11. [Порядок действий на Dune — Чеклист](#порядок-действий-на-dune--чеклист)
+8. [Query 5.4: Agently Catalog Growth](#query-54-agently-catalog--agent-growth--composition)
+9. [Описания индикаторов](#описания-индикаторов)
+10. [Визуализации и оформление](#визуализации-и-оформление)
+11. [Карта Layout](#карта-layout)
+12. [Цветовая палитра](#цветовая-палитра)
+13. [Порядок действий на Dune — Чеклист](#порядок-действий-на-dune--чеклист)
 
 ---
 
@@ -33,7 +35,7 @@ Section 5 — **Tools & Infrastructure** — отслеживает проект
 
 | Section | Queries | Widgets | Rows |
 |---------|---------|---------|------|
-| **5) Tools & Infrastructure** | 3 queries | 1 text + 5 counters + 2 charts + 1 table = **9** | 5 рядов |
+| **5) Tools & Infrastructure** | 4 queries | 1 text + 5 counters + 5 charts + 2 pies = **13** | 8 рядов |
 
 ### Где располагается
 
@@ -65,6 +67,7 @@ Section 5 — **Tools & Infrastructure** — отслеживает проект
 | **BlockRunAI** | `0xe9030014F5DAe217d0A152f02A043567b16c1aBf` | USDC-транзакции через адрес | `erc20_base.evt_Transfer` | 581K+ транзакций. Адрес подтверждён через x402scan по совету команды BlockRunAI |
 | **Floe Labs** | `0x58edde022ffdad3fb0fb0e7d51eb05aaf66a31f1` | Транзакции к/от фасилитатора | `base.transactions` + `erc20_base.evt_Transfer` | Лендинг-фасилитатор x402. Пока минимальная активность (~20 USD) |
 | **CoC x402** | `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d` | x402 платежи (AuthorizationUsed + Transfer) | `base.logs` (двойной фильтр по топикам) | Агентик платежи в Clash of Coins. Фильтрация по x402 AuthorizationUsed отделяет ботов от людей |
+| **Agently** | — (оффчейн) | Каталог агентов: ежедневные регистрации, распределение по чейнам и протоколам | VALUES (hardcoded offchain snapshot) | Оффчейн данные с use-agently.com. Обновляется вручную через VALUES |
 
 ### Вспомогательные адреса (не контракты проектов)
 
@@ -640,18 +643,216 @@ ORDER BY 1 ASC
 
 Сортировка по умолчанию: `day` DESC (новые сверху).
 
-**Альтернативная визуализация 5.3b — "CoC x402 Daily USDC Volume" (Bar + Line, 12 колонок)**
+**Визуализация 5.3 — "CoC x402 Agentic Payments" (Bar + Line, 12 колонок)**
 
 | Параметр | Значение |
 |----------|----------|
 | Тип | **Bar Chart** с **Line overlay** |
 | X-axis | `day` |
-| Bars | `USDC Volume` (Pink `#EC4899`) |
-| Line | `Payments 7d MA` (Amber `#F59E0B`, dashed) |
-| Secondary Y | `Cumulative USDC` (line, Dark Pink `#BE185D`) |
+| Bars | `x402 Payments` (Pink `#EC4899`) |
+| Line 1 | `Payments 7d MA` (Amber `#F59E0B`, dashed) |
 | Высота | 300px |
-| Заголовок | `CoC x402: Daily Agentic Payments (USDC)` |
-| Описание | `AI agent purchases in Clash of Coins via x402 protocol. Only payments with AuthorizationUsed event.` |
+| Заголовок | `CoC x402: Daily Agentic Payments` |
+| Описание | `Pure signal: only x402-verified AI agent purchases in Clash of Coins. Human payments filtered out via AuthorizationUsed events.` |
+
+---
+
+## QUERY 5.4: Agently Catalog — Agent Growth & Composition
+
+### Что он делает
+Отслеживает рост каталога агентов на платформе Agently (use-agently.com). Данные оффчейн — ежедневные регистрации новых агентов, кумулятивный рост, распределение по блокчейнам и протоколам. Данные хардкодятся через VALUES и обновляются вручную.
+
+### Описание для дашборда
+> The agent registry in motion — daily onboarding velocity, cumulative growth, and ecosystem composition by chain and protocol.
+
+### Название при сохранении
+`Agently Catalog - Agent Growth & Composition (V1)`
+
+### SQL-код
+
+```sql
+-- Section 5: Agently Catalog — Agent Onboarding & Ecosystem Composition
+-- Offchain data from https://use-agently.com/ (Hempanda research, query #7401373)
+-- Shows daily agent registrations, cumulative growth, chain & protocol distribution
+--
+-- Save as: "Agently Catalog - Agent Growth & Composition (V1)"
+
+WITH daily AS (
+    SELECT * FROM (
+        VALUES
+            (DATE '2026-04-23', 2),
+            (DATE '2026-04-22', 6),
+            (DATE '2026-04-21', 1),
+            (DATE '2026-04-20', 2),
+            (DATE '2026-04-19', 1),
+            (DATE '2026-04-17', 1),
+            (DATE '2026-04-16', 2),
+            (DATE '2026-04-13', 1),
+            (DATE '2026-04-12', 2),
+            (DATE '2026-04-11', 16),
+            (DATE '2026-04-10', 5),
+            (DATE '2026-04-09', 7),
+            (DATE '2026-04-08', 6),
+            (DATE '2026-04-07', 2),
+            (DATE '2026-04-06', 5),
+            (DATE '2026-04-05', 2),
+            (DATE '2026-04-04', 6),
+            (DATE '2026-04-03', 3),
+            (DATE '2026-04-02', 1),
+            (DATE '2026-04-01', 7),
+            (DATE '2026-03-31', 18),
+            (DATE '2026-03-30', 1),
+            (DATE '2026-03-29', 1),
+            (DATE '2026-03-28', 5),
+            (DATE '2026-03-27', 11),
+            (DATE '2026-03-26', 8),
+            (DATE '2026-03-25', 11),
+            (DATE '2026-03-24', 46),
+            (DATE '2026-03-23', 75),
+            (DATE '2026-03-22', 110),
+            (DATE '2026-03-21', 35),
+            (DATE '2026-03-20', 9),
+            (DATE '2026-03-19', 4),
+            (DATE '2026-03-18', 51),
+            (DATE '2026-03-17', 11),
+            (DATE '2026-03-16', 15),
+            (DATE '2026-03-15', 14),
+            (DATE '2026-03-14', 5),
+            (DATE '2026-03-13', 22),
+            (DATE '2026-03-12', 3),
+            (DATE '2026-03-11', 20),
+            (DATE '2026-03-10', 11),
+            (DATE '2026-03-09', 5),
+            (DATE '2026-03-08', 77),
+            (DATE '2026-03-07', 102),
+            (DATE '2026-03-06', 123),
+            (DATE '2026-03-05', 32),
+            (DATE '2026-03-04', 9),
+            (DATE '2026-03-03', 273),
+            (DATE '2026-03-02', 12),
+            (DATE '2026-03-01', 101),
+            (DATE '2026-02-28', 9),
+            (DATE '2026-02-27', 8),
+            (DATE '2026-02-26', 154),
+            (DATE '2026-02-25', 116),
+            (DATE '2026-02-24', 45),
+            (DATE '2026-02-23', 4),
+            (DATE '2026-02-22', 11),
+            (DATE '2026-02-21', 13),
+            (DATE '2026-02-20', 10),
+            (DATE '2026-02-19', 27),
+            (DATE '2026-02-18', 9),
+            (DATE '2026-02-17', 5),
+            (DATE '2026-02-16', 3),
+            (DATE '2026-02-15', 4),
+            (DATE '2026-02-14', 10),
+            (DATE '2026-02-13', 7),
+            (DATE '2026-02-12', 4),
+            (DATE '2026-02-11', 11),
+            (DATE '2026-02-10', 30),
+            (DATE '2026-02-09', 45),
+            (DATE '2026-02-08', 33),
+            (DATE '2026-02-07', 10),
+            (DATE '2026-02-06', 8),
+            (DATE '2026-02-05', 13),
+            (DATE '2026-02-04', 9),
+            (DATE '2026-02-03', 17),
+            (DATE '2026-02-02', 24),
+            (DATE '2026-02-01', 23),
+            (DATE '2026-01-31', 7),
+            (DATE '2026-01-30', 13),
+            (DATE '2026-01-29', 8)
+    ) AS t(day, agents_added)
+)
+
+SELECT
+    day,
+    agents_added AS "New Agents",
+    SUM(agents_added) OVER (ORDER BY day) AS "Cumulative Agents",
+    ROUND(AVG(agents_added) OVER (ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS "7d MA",
+
+    -- chain constants (latest snapshot)
+    1583 AS "Base Agents",
+    275 AS "BNB Agents",
+    128 AS "Ethereum Agents",
+    7 AS "Arbitrum Agents",
+    4 AS "Polygon Agents",
+    3 AS "Optimism Agents",
+
+    -- protocol constants (latest snapshot)
+    1496 AS "MCP Agents",
+    1117 AS "A2A Agents",
+    513 AS "Web Agents",
+    369 AS "OASF Agents",
+    2 AS "Email Agents"
+
+FROM daily
+ORDER BY day ASC
+```
+
+### Как оформить: 3 визуализации (РЯДЫ S5-6, S5-7, S5-8)
+
+**Визуализация 5.4a — "Agently: Agent Onboarding Velocity" (Bar + Area, РЯД S5-6, 12 колонок)**
+
+| Параметр | Значение |
+|----------|----------|
+| Тип | **Combo Chart** (Bar + Area) |
+| X-axis | `day` |
+| Bars | `New Agents` (Cyan `#06B6D4`) |
+| Area | `Cumulative Agents` (Green `#10B981`, opacity 0.15, right Y-axis) |
+| Line overlay | `7d MA` (Amber `#F59E0B`, dashed, width 2) |
+| Высота | 350px |
+| Заголовок | `Agently: Agent Onboarding Velocity` |
+| Описание | `Daily new agent registrations (bars) with cumulative growth (area) and 7-day moving average (line). Offchain data from use-agently.com catalog.` |
+
+**Как создать в Dune:**
+1. Открой запрос → New visualization → **Bar Chart**
+2. X-axis: `day`
+3. Add series: `New Agents` → тип: Bar, цвет: `#06B6D4`
+4. Add series: `Cumulative Agents` → тип: Area, цвет: `#10B981`, opacity: 0.15, ось: Right Y
+5. Add series: `7d MA` → тип: Line, цвет: `#F59E0B`, style: dashed
+
+**Визуализация 5.4b — "Agents by Blockchain" (Pie/Donut, РЯД S5-7, 6 колонок)**
+
+Для пирога нужно создать **отдельную визуализацию** из того же запроса. Dune берёт первую строку, а chain-колонки — константы, одинаковые в каждой строке.
+
+| Параметр | Значение |
+|----------|----------|
+| Тип | **Pie Chart** (donut) |
+| Слайсы | Создай вручную из первой строки: Base (1583), BNB (275), Ethereum (128), Arbitrum (7), Polygon (4), Optimism (3) |
+| Цвета | Base: `#3B82F6`, BNB: `#F59E0B`, Ethereum: `#8B5CF6`, Arbitrum: `#06B6D4`, Polygon: `#EC4899`, Optimism: `#EF4444` |
+| Заголовок | `Agents by Blockchain` |
+| Описание | `79% of registered agents are on Base — the dominant chain for agentic infrastructure.` |
+
+> **Примечание:** Dune pie charts работают по колонкам одной строки. В данном случае колонки `Base Agents`, `BNB Agents`, `Ethereum Agents` и т.д. — это как раз то, что нужно. Выбери **Counter/Pie** визуализацию и укажи колонки как series.
+
+**Визуализация 5.4c — "Agents by Protocol" (Pie/Donut, РЯД S5-7, 6 колонок)**
+
+| Параметр | Значение |
+|----------|----------|
+| Тип | **Pie Chart** (donut) |
+| Слайсы | MCP (1496), A2A (1117), Web (513), OASF (369), Email (2) |
+| Цвета | MCP: `#3B82F6`, A2A: `#10B981`, Web: `#8B5CF6`, OASF: `#F59E0B`, Email: `#64748B` |
+| Заголовок | `Agents by Protocol` |
+| Описание | `MCP and A2A protocols dominate — together powering 75% of all registered agents.` |
+
+---
+
+## ОПИСАНИЯ ИНДИКАТОРОВ
+
+Краткие описания для каждого индикатора — использовать в **Description** поле виджетов на Dune.
+
+### Query 5.1: Tools & Infra — Combined KPIs
+> **Dashboard description:** Headline metrics across all agentic infrastructure on Base — total throughput, reach, and weekly momentum in one glance. Covers BlockRunAI, Floe Labs, and CoC x402 agentic payments.
+
+### Query 5.2: Tools & Infra — Daily Activity Trend
+> **Dashboard description:** Who's building the rails? Daily breakdown of transaction volume by project, revealing which infrastructure captures the most agent traffic. BlockRunAI dominates with 500K+ USDC transfers routed through its contracts.
+
+### Query 5.3: CoC x402 — Agentic Payments
+> **Dashboard description:** Pure signal: only x402-verified AI agent purchases in Clash of Coins. Human payments filtered out via dual-topic filtering (Transfer + AuthorizationUsed in same tx). Shows daily payment count, USDC volume, and unique payers.
+
+### Query 5.4: Agently Catalog — Agent Growth & Composition
+> **Dashboard description:** The agent registry in motion — daily onboarding velocity, cumulative growth, and ecosystem composition by chain and protocol. Base hosts 79% of all agents. MCP and A2A protocols power 75% of the catalog. Offchain data from use-agently.com.
 
 ---
 
@@ -670,9 +871,12 @@ ORDER BY 1 ASC
 | S5-G1 | Stacked Bar | Query 5.2 | Tools & Infra - Daily Transaction Activity |
 | S5-G2 | Area Chart | Query 5.2 | Cumulative USDC Volume |
 | S5-G3 | Line Chart | Query 5.2 | Cumulative Transactions |
-| S5-G4 | Bar + Line | Query 5.3 | CoC x402: Daily Agentic Payments (USDC) |
+| S5-G4 | Bar + Line | Query 5.3 | CoC x402: Daily Agentic Payments |
+| S5-G5 | Bar + Area + Line | Query 5.4 | Agently: Agent Onboarding Velocity |
+| S5-P1 | Pie (Donut) | Query 5.4 | Agents by Blockchain |
+| S5-P2 | Pie (Donut) | Query 5.4 | Agents by Protocol |
 
-**Итого: 10 элементов (1 text + 5 counters + 4 charts) в 5 рядах.**
+**Итого: 13 элементов (1 text + 5 counters + 5 charts + 2 pies) в 8 рядах.**
 
 ---
 
@@ -698,6 +902,14 @@ ORDER BY 1 ASC
 
 РЯД S5-5: [ГРАФИК 5.3 — 12 колонок]
           CoC x402: Daily Agentic Payments (bar + line)
+
+РЯД S5-6: [ГРАФИК 5.4a — 12 колонок]
+          Agently: Agent Onboarding Velocity (bars + area + 7d MA line)
+
+РЯД S5-7: [PIE 5.4b — 6 кол.]        [PIE 5.4c — 6 кол.]
+          Agents by Blockchain          Agents by Protocol
+
+РЯД S5-8: (резерв для будущих индикаторов)
 ```
 
 ---
@@ -713,6 +925,8 @@ ORDER BY 1 ASC
 | Growth / Positive | Green | `#10B981` |
 | Decline / Negative | Red | `#EF4444` |
 | Counterparties | Purple | `#8B5CF6` |
+| Agently Bars | Cyan | `#06B6D4` |
+| Agently Cumulative | Green | `#10B981` |
 | Cumulative Lines | Dark Blue `#1E40AF`, Dark Pink `#BE185D` |
 | 7d MA Lines | Amber `#F59E0B` (dashed) |
 
@@ -728,7 +942,11 @@ ORDER BY 1 ASC
 - [ ] **1.4** Новый запрос → Вставь SQL из Query 5.2 → Run → Сохрани как `Tools & Infra - Daily Activity Trend (V1)`
 - [ ] **1.5** Создай 3 визуализации: Stacked Bar (5.2a), Area (5.2b), Line (5.2c)
 - [ ] **1.6** Новый запрос → Вставь SQL из Query 5.3 → Run → Сохрани как `CoC x402 - Agentic Payments (V1)`
-- [ ] **1.7** Создай визуализацию Bar + Line (5.3)
+- [ ] **1.7** Создай визуализацию Bar + Line (5.3): bars = x402 Payments, line = 7d MA
+- [ ] **1.8** Новый запрос → Вставь SQL из Query 5.4 → Run → Сохрани как `Agently Catalog - Agent Growth & Composition (V1)`
+- [ ] **1.9** Создай визуализацию 5.4a: Bar+Area+Line (New Agents bars, Cumulative area, 7d MA line)
+- [ ] **1.10** Создай визуализацию 5.4b: Pie/Donut (Agents by Blockchain)
+- [ ] **1.11** Создай визуализацию 5.4c: Pie/Donut (Agents by Protocol)
 
 ### Фаза 2: Размещение на дашборде
 
@@ -739,11 +957,13 @@ ORDER BY 1 ASC
 - [ ] **2.5** Добавь Stacked Bar chart (S5-3): визуализация 5.2a на 12 колонок
 - [ ] **2.6** Добавь 2 графика (S5-4): Area (5.2b, 6 кол.) + Line (5.2c, 6 кол.)
 - [ ] **2.7** Добавь Bar + Line chart (S5-5): визуализация 5.3 на 12 колонок
-- [ ] **2.8** Проверь порядок: Section 5 → Section 3 (Gaming) → Section 4 (OWB)
+- [ ] **2.8** Добавь график Agently (S5-6): визуализация 5.4a на 12 колонок
+- [ ] **2.9** Добавь 2 пирога (S5-7): Agents by Blockchain (6 кол.) + Agents by Protocol (6 кол.)
+- [ ] **2.10** Проверь порядок: Section 5 → Section 3 (Gaming) → Section 4 (OWB)
 
 ### Фаза 3: Проверка и финализация
 
-- [ ] **3.1** Обнови все 3 запроса — проверь что данные корректны
+- [ ] **3.1** Обнови все 4 запроса — проверь что данные корректны
 - [ ] **3.2** Проверь что BlockRunAI показывает 500K+ транзакций (а не 155)
 - [ ] **3.3** Проверь что CoC x402 показывает только x402 платежи (не все USDC-переводы)
 - [ ] **3.4** Проверь что Floe Labs показывает минимальную активность (это нормально — проект в тестировании)
@@ -766,7 +986,7 @@ ORDER BY 1 ASC
 | **Floe Labs: минимальная активность** | Проект в тестировании. ~20 USD суммарных оборотов. Метрики покажут рост по мере запуска |
 | **CoC x402: с марта 2026** | x402 платежи в CoC начались ~25.03.2026. Данные до этой даты будут пустыми |
 | **4Mica: нет данных** | Контракт не найден. Добавим когда появится информация от команды |
-| **Agently: оффчейн** | Данные с use-agently.com доступны только оффчейн. См. отдельный запрос Hempanda #7401373 |
+| **Agently: оффчейн** | Данные с use-agently.com доступны только оффчейн. Обновляется вручную через VALUES в Query 5.4 |
 | **Фасилитаторы Coinbase CDP** | x402 фасилитаторы ротируются на стороне Coinbase. Полный список может измениться |
 
 ---
@@ -774,7 +994,7 @@ ORDER BY 1 ASC
 ## БУДУЩИЕ ДОРАБОТКИ (V2)
 
 1. **Добавить другие фасилитаторы x402** — Coinbase CDP ротирует адреса, нужен полный список
-2. **Agently offchain metrics** — каталог агентов по чейнам/типам через Hempanda's скрипт (#7401373)
+2. **Agently — автоматизация обновлений** — сейчас VALUES обновляются вручную; нужен скрипт для авто-синхронизации с use-agently.com
 3. **4Mica** — добавить когда станет известен контракт
 4. **Ethy AI + Axelrod** — крупнейшие Virtuals-агенты по ACP (если решим добавить в Tools & Infra)
 5. **TVL агентов** — балансы адресов, управляемых агентами (если появится snapshot data на Base)

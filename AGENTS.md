@@ -24,6 +24,7 @@ base-agentic-ecosystem/
       01_tools_infra_combined_kpis.sql          # Query 5.1: Combined KPIs for all infra projects
       02_tools_infra_daily_activity.sql          # Query 5.2: Daily activity trend (stacked bars)
       03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
+      04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
 ```
 
 ## Dashboard Sections
@@ -37,7 +38,7 @@ base-agentic-ecosystem/
 | ERC-8004 Registry | Query 4a/4b | Agent identity registrations, creator concentration |
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
-| Tools & Infrastructure | Query 5.1/5.2/5.3 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments |
+| Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
 
 ## Tracked Contracts
 
