@@ -18,6 +18,13 @@ base-agentic-ecosystem/
     BASE_AGENTIC_DASHBOARD_INSTRUCTIONS_RU.md  # Full dashboard guide (Russian) — all queries + widget setup
     DASHBOARD_V1_UPDATE_GUIDE.md               # V1 iteration changes — what to update on the live dashboard
     OWB_POOL_RESEARCH_DEC_4_10_2025.md         # Standalone research: OWB token pool analysis
+    SECTION_5_TOOLS_INFRA.md                   # Section 5: Tools & Infrastructure — full guide + SQL
+  queries/
+    tools-infra/
+      01_tools_infra_combined_kpis.sql          # Query 5.1: Combined KPIs for all infra projects
+      02_tools_infra_daily_activity.sql          # Query 5.2: Daily activity trend (stacked bars)
+      03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
+      04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
 ```
 
 ## Dashboard Sections
@@ -31,6 +38,7 @@ base-agentic-ecosystem/
 | ERC-8004 Registry | Query 4a/4b | Agent identity registrations, creator concentration |
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
+| Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
 
 ## Tracked Contracts
 
@@ -57,7 +65,7 @@ base-agentic-ecosystem/
 | Standard | Address / Status |
 |----------|-----------------|
 | ERC-8004 (Agent Identity Registry) | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` |
-| x402 (HTTP-native agent payments) | Not yet measurable onchain at scale |
+| x402 (HTTP-native agent payments) | Measurable via AuthorizationUsed events in `base.logs` |
 
 ### Solana — Comparison Tokens
 | Token | Mint Address |
@@ -132,6 +140,10 @@ Score = 55% × (project_txs / max_txs) + 45% × (project_users / max_users)
 | Volume/Money | `#F59E0B` (Amber) |
 | Cumulative lines | `#1E40AF`, `#6D28D9` (Dark variants) |
 | Decline/Negative | `#EF4444` (Red) |
+| Agentic Gaming | `#EC4899` (Pink/Magenta) |
+| OWB Brand | `#F97316` (Orange) |
+| Bot/Agent Metrics | `#06B6D4` (Cyan) |
+| Revenue/MRR | `#22C55E` (Emerald) |
 
 ## Tools & Integrations
 
