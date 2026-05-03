@@ -671,12 +671,6 @@ ORDER BY 1 ASC
 ### SQL-код
 
 ```sql
--- Section 5: Agently Catalog — Agent Onboarding & Ecosystem Composition
--- Offchain data from https://use-agently.com/ (Hempanda research, query #7401373)
--- Shows daily agent registrations, cumulative growth, chain & protocol distribution
---
--- Save as: "Agently Catalog - Agent Growth & Composition (V1)"
-
 WITH daily AS (
     SELECT * FROM (
         VALUES
@@ -763,31 +757,46 @@ WITH daily AS (
             (DATE '2026-01-30', 13),
             (DATE '2026-01-29', 8)
     ) AS t(day, agents_added)
+),
+
+timeseries AS (
+    SELECT
+        'timeseries' AS section,
+        day,
+        CAST(NULL AS VARCHAR) AS category,
+        agents_added AS new_agents,
+        SUM(agents_added) OVER (ORDER BY day) AS cumulative_agents,
+        ROUND(AVG(agents_added) OVER (
+            ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+        ), 1) AS ma_7d,
+        CAST(NULL AS BIGINT) AS agents
+    FROM daily
+),
+
+chains AS (
+    SELECT
+        'chains' AS section,
+        CAST(NULL AS DATE) AS day,
+        blockchain AS category,
+        CAST(NULL AS BIGINT) AS new_agents,
+        CAST(NULL AS BIGINT) AS cumulative_agents,
+        CAST(NULL AS DOUBLE) AS ma_7d,
+        agents
+    FROM (
+        VALUES
+            ('Base', 1583),
+            ('BNB Chain', 275),
+            ('Ethereum', 128),
+            ('Arbitrum', 7),
+            ('Polygon', 4),
+            ('Optimism', 3)
+    ) AS t(blockchain, agents)
 )
 
-SELECT
-    day,
-    agents_added AS "New Agents",
-    SUM(agents_added) OVER (ORDER BY day) AS "Cumulative Agents",
-    ROUND(AVG(agents_added) OVER (ORDER BY day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS "7d MA",
-
-    -- chain constants (latest snapshot)
-    1583 AS "Base Agents",
-    275 AS "BNB Agents",
-    128 AS "Ethereum Agents",
-    7 AS "Arbitrum Agents",
-    4 AS "Polygon Agents",
-    3 AS "Optimism Agents",
-
-    -- protocol constants (latest snapshot)
-    1496 AS "MCP Agents",
-    1117 AS "A2A Agents",
-    513 AS "Web Agents",
-    369 AS "OASF Agents",
-    2 AS "Email Agents"
-
-FROM daily
-ORDER BY day ASC
+SELECT * FROM timeseries
+UNION ALL
+SELECT * FROM chains
+ORDER BY section, day, agents DESC
 ```
 
 ### Как оформить: 3 визуализации (РЯДЫ S5-6, S5-7, S5-8)
