@@ -19,12 +19,21 @@ base-agentic-ecosystem/
     DASHBOARD_V1_UPDATE_GUIDE.md               # V1 iteration changes — what to update on the live dashboard
     OWB_POOL_RESEARCH_DEC_4_10_2025.md         # Standalone research: OWB token pool analysis
     SECTION_5_TOOLS_INFRA.md                   # Section 5: Tools & Infrastructure — full guide + SQL
+    SECTION_6_CARDS_DASHBOARD.md               # Section 6: Cards Dashboard — RWA tokenized cards guide + SQL
   queries/
     tools-infra/
       01_tools_infra_combined_kpis.sql          # Query 5.1: Combined KPIs for all infra projects
       02_tools_infra_daily_activity.sql          # Query 5.2: Daily activity trend (stacked bars)
       03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
       04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
+    cards-dashboard/
+      01_cards_ecosystem_pulse_kpis.sql           # Query C.1: Combined KPIs for all card projects
+      02_cards_projects_leaderboard.sql           # Query C.2: Head-to-head project comparison
+      03_cards_weekly_activity.sql                # Query C.3: Weekly volume time series (stacked)
+      04_beezie_nft_activity.sql                  # Query C.4: Beezie NFT mints/burns/trades (Base)
+      05_courtyard_market_activity.sql            # Query C.5: Courtyard NFT + holder growth (Polygon)
+      06_upshot_deposits_withdrawals.sql          # Query C.6: Upshot USDC flows (Base)
+      07_collector_crypt_token_trading.sql        # Query C.7: CARDS token DEX trading (Solana)
 ```
 
 ## Dashboard Sections
@@ -39,6 +48,7 @@ base-agentic-ecosystem/
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
 | Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
+| Cards Dashboard | Query C.1/C.2/C.3/C.4/C.5/C.6/C.7 | Tokenized collectibles: Beezie (Base), Courtyard (Polygon), Collector Crypt (Solana), Upshot (Base) |
 
 ## Tracked Contracts
 
@@ -77,6 +87,15 @@ base-agentic-ecosystem/
 | Zerebro | `8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn` |
 | GRIFFAIN | `KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP` |
 | VIRTUAL (SOL) | `3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y` |
+
+### Cards Dashboard — Tracked Projects
+| Project | Chain | Address / Token |
+|---------|-------|-----------------|
+| Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` |
+| Courtyard (NFT) | Polygon | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` |
+| Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` |
+| Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` |
+| Phygitals (cNFTs) | Solana | V2 — compressed NFTs via Metaplex Bubblegum |
 
 ## Code Standards
 
