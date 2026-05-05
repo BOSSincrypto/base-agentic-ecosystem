@@ -108,7 +108,7 @@ total_kpi AS (
 this_week AS (
     SELECT
         COUNT(DISTINCT tx_hash) AS week_trades,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS week_volume
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS week_volume
     FROM all_txs
     WHERE block_time >= now() - interval '7' day
 ),
@@ -116,7 +116,7 @@ this_week AS (
 prev_week AS (
     SELECT
         COUNT(DISTINCT tx_hash) AS prev_trades,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS prev_volume
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS prev_volume
     FROM all_txs
     WHERE block_time >= now() - interval '14' day
       AND block_time < now() - interval '7' day

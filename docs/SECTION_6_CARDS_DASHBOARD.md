@@ -243,7 +243,7 @@ total_kpi AS (
 this_week AS (
     SELECT
         COUNT(DISTINCT tx_hash) AS week_trades,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS week_volume
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS week_volume
     FROM all_txs
     WHERE block_time >= now() - interval '7' day
 ),
@@ -251,7 +251,7 @@ this_week AS (
 prev_week AS (
     SELECT
         COUNT(DISTINCT tx_hash) AS prev_trades,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS prev_volume
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS prev_volume
     FROM all_txs
     WHERE block_time >= now() - interval '14' day
       AND block_time < now() - interval '7' day
@@ -341,7 +341,7 @@ WITH beezie_30d AS (
 beezie_7d AS (
     SELECT
         COUNT(*) AS trades_7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_7d
     FROM nft.trades
     WHERE blockchain = 'base'
       AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
@@ -351,7 +351,7 @@ beezie_7d AS (
 beezie_prev7d AS (
     SELECT
         COUNT(*) AS trades_prev7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_prev7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_prev7d
     FROM nft.trades
     WHERE blockchain = 'base'
       AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
@@ -378,7 +378,7 @@ courtyard_30d AS (
 courtyard_7d AS (
     SELECT
         COUNT(*) AS trades_7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_7d
     FROM nft.trades
     WHERE blockchain = 'polygon'
       AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
@@ -388,7 +388,7 @@ courtyard_7d AS (
 courtyard_prev7d AS (
     SELECT
         COUNT(*) AS trades_prev7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_prev7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_prev7d
     FROM nft.trades
     WHERE blockchain = 'polygon'
       AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
@@ -417,7 +417,7 @@ cc_30d AS (
 cc_7d AS (
     SELECT
         COUNT(*) AS trades_7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_7d
     FROM dex_solana.trades
     WHERE (
         token_bought_mint_address = 'CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp'
@@ -429,7 +429,7 @@ cc_7d AS (
 cc_prev7d AS (
     SELECT
         COUNT(*) AS trades_prev7d,
-        ROUND(SUM(COALESCE(amount_usd, 0)), 2) AS volume_prev7d
+        COALESCE(ROUND(SUM(COALESCE(amount_usd, 0)), 2), 0) AS volume_prev7d
     FROM dex_solana.trades
     WHERE (
         token_bought_mint_address = 'CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp'
@@ -458,7 +458,7 @@ upshot_30d AS (
 upshot_7d AS (
     SELECT
         COUNT(DISTINCT evt_tx_hash) AS trades_7d,
-        ROUND(SUM(CAST(value AS DOUBLE) / 1e6), 2) AS volume_7d
+        COALESCE(ROUND(SUM(CAST(value AS DOUBLE) / 1e6), 2), 0) AS volume_7d
     FROM erc20_base.evt_Transfer
     WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
       AND "to" = 0x939dbbcf075de12d9d8df08ef727591ddebbc13b
@@ -468,7 +468,7 @@ upshot_7d AS (
 upshot_prev7d AS (
     SELECT
         COUNT(DISTINCT evt_tx_hash) AS trades_prev7d,
-        ROUND(SUM(CAST(value AS DOUBLE) / 1e6), 2) AS volume_prev7d
+        COALESCE(ROUND(SUM(CAST(value AS DOUBLE) / 1e6), 2), 0) AS volume_prev7d
     FROM erc20_base.evt_Transfer
     WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
       AND "to" = 0x939dbbcf075de12d9d8df08ef727591ddebbc13b
