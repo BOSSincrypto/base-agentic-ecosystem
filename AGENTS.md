@@ -19,7 +19,7 @@ base-agentic-ecosystem/
     DASHBOARD_V1_UPDATE_GUIDE.md               # V1 iteration changes — what to update on the live dashboard
     OWB_POOL_RESEARCH_DEC_4_10_2025.md         # Standalone research: OWB token pool analysis
     SECTION_5_TOOLS_INFRA.md                   # Section 5: Tools & Infrastructure — full guide + SQL
-    SECTION_6_CARDS_DASHBOARD.md               # Section 6: Cards Dashboard — RWA tokenized cards guide + SQL
+    CARDS_DASHBOARD_STANDALONE.md               # Standalone Cards Dashboard — RWA tokenized collectibles market
   queries/
     tools-infra/
       01_tools_infra_combined_kpis.sql          # Query 5.1: Combined KPIs for all infra projects
@@ -27,13 +27,12 @@ base-agentic-ecosystem/
       03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
       04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
     cards-dashboard/
-      01_cards_ecosystem_pulse_kpis.sql           # Query C.1: Combined KPIs for all card projects
-      02_cards_projects_leaderboard.sql           # Query C.2: Head-to-head project comparison
-      03_cards_weekly_activity.sql                # Query C.3: Weekly volume time series (stacked)
-      04_beezie_nft_activity.sql                  # Query C.4: Beezie NFT mints/burns/trades (Base)
-      05_courtyard_market_activity.sql            # Query C.5: Courtyard NFT + holder growth (Polygon)
-      06_upshot_deposits_withdrawals.sql          # Query C.6: Upshot USDC flows (Base)
-      07_collector_crypt_token_trading.sql        # Query C.7: CARDS token DEX trading (Solana)
+      01_weekly_volume_by_project.sql              # Query 1: Weekly primary volume (stacked bar + market share %)
+      02_market_share_total.sql                    # Query 2: Total market share pie chart
+      03_secondary_market_volume.sql               # Query 3: Secondary market via nft.trades / DEX
+      04_niche_card_types.sql                      # Query 4: Card types distribution (Pokemon/Sport)
+      05_kpi_counters.sql                          # Query 5: Combined KPI counters
+      06_collector_crypt_gacha_plays.sql           # Query 6: CC gacha plays by rarity (Solana)
 ```
 
 ## Dashboard Sections
@@ -48,7 +47,7 @@ base-agentic-ecosystem/
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
 | Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
-| Cards Dashboard | Query C.1/C.2/C.3/C.4/C.5/C.6/C.7 | Tokenized collectibles: Beezie (Base), Courtyard (Polygon), Collector Crypt (Solana), Upshot (Base) |
+| Cards Dashboard (Standalone) | Query 1–6 | Separate dashboard: market share, weekly volume, secondary, card types, CC gacha plays |
 
 ## Tracked Contracts
 
@@ -88,14 +87,15 @@ base-agentic-ecosystem/
 | GRIFFAIN | `KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP` |
 | VIRTUAL (SOL) | `3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y` |
 
-### Cards Dashboard — Tracked Projects
-| Project | Chain | Address / Token |
-|---------|-------|-----------------|
-| Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` |
-| Courtyard (NFT) | Polygon | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` |
-| Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` |
-| Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` |
-| Phygitals (cNFTs) | Solana | V2 — compressed NFTs via Metaplex Bubblegum |
+### Cards Dashboard — Tracked Projects (Standalone)
+| Project | Chain | Address / Token | Data Source |
+|---------|-------|-----------------|-------------|
+| Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | `nft.trades` |
+| Courtyard (NFT) | Polygon | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | `nft.trades` |
+| Collector Crypt (Gacha) | Solana | Gacha: `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` | `tokens_solana.transfers` |
+| Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` | `dex_solana.trades` |
+| Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | `erc20_base.evt_Transfer` |
+| Phygitals (cNFTs) | Solana | V2 — compressed NFTs via Metaplex Bubblegum | V2 |
 
 ## Code Standards
 
