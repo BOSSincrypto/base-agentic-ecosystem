@@ -91,7 +91,7 @@ The [Base Agentic Ecosystem](https://dune.com/ax1research/base-agentic-ecosystem
 | # | Project | Chain | Type | How Volume Is Tracked | Data Source |
 |---|---------|-------|------|----------------------|-------------|
 | 1 | **Beezie** | Base | NFT Claw Machine | NFT sales via marketplaces | `nft.trades` (blockchain='base') |
-| 2 | **Courtyard** | Polygon | NFT Marketplace | NFT sales via Seaport ⚠️ | `nft.trades` (blockchain='polygon') |
+| 2 | **Courtyard** | Polygon | NFT Marketplace | Marketplace trade events (volume + fees) | `polygon.logs` (raw byte parse) |
 | 3 | **Collector Crypt** | Solana | Gacha Packs + CARDS Token | USDC inflows to gacha wallets | `tokens_solana.transfers` |
 | 4 | **Upshot** | Base | Prediction Cards | USDC deposits to contract | `erc20_base.evt_Transfer` |
 | 5 | **Phygitals** | Solana | Pack Opening + Claw + Lucky Draw | USDC inflows to gacha wallets | `tokens_solana.transfers` |
@@ -110,7 +110,9 @@ The [Base Agentic Ecosystem](https://dune.com/ax1research/base-agentic-ecosystem
 | Project | Address / Contract | Role |
 |---------|-------------------|------|
 | **Beezie** | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | NFT contract (Base) |
-| **Courtyard** | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | NFT contract (Polygon, Seaport) |
+| **Courtyard** | `0x5e4943373c2198625bd441ae0629e9e7b4fb4797` | Marketplace contract (Polygon) |
+| **Courtyard** | topic0: `0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd` | Trade event signature |
+| **Courtyard** | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | NFT contract (for reference) |
 | **Upshot** | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | Deposit contract (Base) |
 
 ### Market Scale (Caggy / DefiLlama, Feb 2026)
@@ -219,28 +221,28 @@ Source: DefiLlama adapter (`fees/phygitals/index.ts`) + Phygitals docs.
 
 ---
 
-## COURTYARD — DATA QUALITY NOTE
+## COURTYARD — DATA SOURCE NOTE
 
-⚠️ **Important: Courtyard data is provisional and likely undercounts true volume.**
+### Approach: Raw Marketplace Events
 
-### The Issue
+Courtyard operates its own marketplace on Polygon. The Dune Spellbook `nft.trades` table does NOT have a Courtyard-specific marketplace model (Spellbook PR #8704 still open), so using `nft.trades` massively undercounts volume.
 
-Courtyard operates its own marketplace on Polygon using the Seaport protocol. The Dune Spellbook `nft.trades` table currently does NOT have a Courtyard-specific marketplace model — there is an [open PR (#8704)](https://github.com/duneanalytics/spellbook/pull/8704) to add it.
+**Solution:** We parse raw trade events directly from `polygon.logs`:
+- **Contract:** `0x5e4943373c2198625bd441ae0629e9e7b4fb4797` (Courtyard marketplace)
+- **Event topic0:** `0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd`
+- **Data layout:** `substr(data, 33, 32)` = volume (USDC, 6 decimals), `substr(data, 97, 32)` = fees (USDC, 6 decimals)
 
-This means:
-- **What we capture:** Courtyard NFTs traded on OTHER marketplaces (OpenSea on Polygon) via existing Seaport model
-- **What we miss:** Trades on Courtyard's own native marketplace (majority of volume)
-- **Impact:** Our on-chain numbers for Courtyard will be significantly lower than reported volumes ($723.9M all-time per Caggy/DefiLlama)
+### What This Captures
 
-### Current Approach
+- ✅ **Trading volume (turnover)** on Courtyard's native marketplace — significantly more realistic than `nft.trades`
+- ✅ **Platform fees** — enables fee rate % calculation
+- ⚠️ **Note:** This is trading volume (turnover), not net incoming revenue. For market share comparison this is the correct metric.
+- ⚠️ **unique_buyers** not available from raw logs (no decoded buyer address in this event) — uses `COUNT(DISTINCT tx_hash)` as proxy in KPI counter
 
-Keep `nft.trades` with `nft_contract_address = 0x251BE3A...` as V1 source, with prominent disclaimer. This captures SOME secondary market activity but is not comprehensive.
+### Future Options
 
-### V2 Fix Options
-
-1. Wait for Spellbook PR #8704 to merge → Courtyard will appear properly in `nft.trades`
-2. Parse raw Seaport events from `polygon.logs` for Courtyard's marketplace contract
-3. Use Courtyard API data (off-chain, less trustworthy for a Dune dashboard)
+1. When Spellbook PR #8704 merges → can switch back to `nft.trades` for cleaner data + buyer addresses
+2. Could cross-reference with `nft.transfers` to get buyer/seller from same tx_hash
 
 ---
 
@@ -375,12 +377,12 @@ WITH beezie_vol AS (
 
 courtyard_vol AS (
     SELECT
-        COALESCE(SUM(amount_usd), 0) AS vol,
-        approx_distinct(buyer)       AS users
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS vol,
+        COUNT(DISTINCT tx_hash) AS users
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
 ),
 
 cc_vol AS (
@@ -468,12 +470,15 @@ this_week AS (
     SELECT
         COALESCE((
             SELECT SUM(amount_usd) FROM nft.trades
-            WHERE blockchain IN ('base', 'polygon')
-              AND nft_contract_address IN (
-                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-              )
+            WHERE blockchain = 'base'
+              AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
               AND block_time >= NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6 FROM polygon.logs
+            WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+              AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+              AND block_date >= CURRENT_DATE - INTERVAL '7' DAY
         ), 0)
       + COALESCE((
             SELECT SUM(amount_usd) FROM tokens_solana.transfers
@@ -491,13 +496,17 @@ prev_week AS (
     SELECT
         COALESCE((
             SELECT SUM(amount_usd) FROM nft.trades
-            WHERE blockchain IN ('base', 'polygon')
-              AND nft_contract_address IN (
-                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-              )
+            WHERE blockchain = 'base'
+              AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
               AND block_time >= NOW() - INTERVAL '14' DAY
               AND block_time <  NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6 FROM polygon.logs
+            WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+              AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+              AND block_date >= CURRENT_DATE - INTERVAL '14' DAY
+              AND block_date <  CURRENT_DATE - INTERVAL '7' DAY
         ), 0)
       + COALESCE((
             SELECT SUM(amount_usd) FROM tokens_solana.transfers
@@ -593,14 +602,14 @@ WITH beezie AS (
 
 courtyard AS (
     SELECT
-        date_trunc('week', block_time)    AS week,
+        date_trunc('week', block_date)    AS week,
         'Courtyard'                       AS project,
         'Polygon'                         AS chain,
-        COALESCE(SUM(amount_usd), 0)      AS volume_usd
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS volume_usd
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
     GROUP BY 1
 ),
 
@@ -736,7 +745,7 @@ Cumulative market share donut chart — each project's slice of total 2026 YTD v
 
 > **Title:** `Cards Market — Market Dominance (V2)`
 > **Viz Title:** `Market Dominance: Who Controls the Ecosystem?`
-> **Description:** Each project's share of total gacha/cards market volume in 2026. The bigger the slice, the bigger the player. Hover for exact USDC amounts. Note: Courtyard data is provisional (see methodology).
+> **Description:** Each project's share of total gacha/cards market volume in 2026. The bigger the slice, the bigger the player. Hover for exact USDC amounts. Note: Courtyard tracks marketplace turnover (see methodology).
 
 ### SQL
 
@@ -758,11 +767,11 @@ WITH beezie AS (
 
 courtyard AS (
     SELECT 'Courtyard' AS project, 'Polygon' AS chain,
-        COALESCE(SUM(amount_usd), 0) AS total_volume_usd
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS total_volume_usd
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
 ),
 
 collector_crypt AS (
@@ -910,16 +919,16 @@ WITH beezie_secondary AS (
 
 courtyard_secondary AS (
     SELECT
-        date_trunc('week', block_time)  AS week,
+        date_trunc('week', block_date)  AS week,
         'Courtyard'                     AS project,
         'Polygon'                       AS chain,
-        COALESCE(SUM(amount_usd), 0)    AS volume_usd,
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS volume_usd,
         COUNT(*)                        AS trades,
-        approx_distinct(buyer)          AS unique_buyers
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        CAST(0 AS BIGINT)               AS unique_buyers
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
     GROUP BY 1
 ),
 
@@ -1508,7 +1517,7 @@ On-chain type classification requires cNFT metadata parsing (Metaplex DAS API or
 
 ## KNOWN LIMITATIONS
 
-1. **Courtyard undercount** — Own marketplace not yet indexed in `nft.trades` (Spellbook PR #8704 open). Numbers represent secondary marketplace trades only.
+1. **Courtyard tracks turnover** — Using raw `polygon.logs` marketplace events (trading volume + fees), NOT net revenue. Spellbook PR #8704 still open for `nft.trades` support. `unique_buyers` uses `tx_hash` count as proxy.
 2. **Cross-chain user dedup** — Same person on multiple chains counted as separate users. True unique count requires off-chain identity resolution.
 3. **Phygitals card types** — Cannot distinguish card types (Pokemon vs Sport vs One Piece) from on-chain USDC transfers alone. Requires cNFT metadata.
 4. **Solana query weight** — `tokens_solana.transfers` is one of the heaviest Dune tables. Medium engine required; small engine consistently times out.

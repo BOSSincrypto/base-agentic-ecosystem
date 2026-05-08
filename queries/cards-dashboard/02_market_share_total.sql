@@ -13,11 +13,11 @@ WITH beezie AS (
 
 courtyard AS (
     SELECT 'Courtyard' AS project, 'Polygon' AS chain,
-        COALESCE(SUM(amount_usd), 0) AS total_volume_usd
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS total_volume_usd
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
 ),
 
 collector_crypt AS (

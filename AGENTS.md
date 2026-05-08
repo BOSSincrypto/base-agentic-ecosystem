@@ -92,7 +92,7 @@ base-agentic-ecosystem/
 | Project | Chain | Address / Token | Data Source |
 |---------|-------|-----------------|-------------|
 | Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | `nft.trades` |
-| Courtyard (NFT) | Polygon | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | `nft.trades` |
+| Courtyard (Marketplace) | Polygon | Contract: `0x5e4943373c...`, topic0: `0xa6ae8077...` | `polygon.logs` (raw byte parse) |
 | Collector Crypt (Gacha) | Solana | 3 wallets: `GachaNgy...`, `GachazZsc...`, `96DULv1B...` | `tokens_solana.transfers` |
 | Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` | `dex_solana.trades` |
 | Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | `erc20_base.evt_Transfer` |

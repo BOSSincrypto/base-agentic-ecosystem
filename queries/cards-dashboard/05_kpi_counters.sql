@@ -14,12 +14,12 @@ WITH beezie_vol AS (
 
 courtyard_vol AS (
     SELECT
-        COALESCE(SUM(amount_usd), 0) AS vol,
-        approx_distinct(buyer)       AS users
-    FROM nft.trades
-    WHERE blockchain = 'polygon'
-      AND nft_contract_address = 0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      AND block_time >= DATE '2026-01-01'
+        COALESCE(ROUND(SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6, 2), 0) AS vol,
+        COUNT(DISTINCT tx_hash) AS users
+    FROM polygon.logs
+    WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+      AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+      AND block_date >= DATE '2026-01-01'
 ),
 
 cc_vol AS (
@@ -107,12 +107,15 @@ this_week AS (
     SELECT
         COALESCE((
             SELECT SUM(amount_usd) FROM nft.trades
-            WHERE blockchain IN ('base', 'polygon')
-              AND nft_contract_address IN (
-                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-              )
+            WHERE blockchain = 'base'
+              AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
               AND block_time >= NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6 FROM polygon.logs
+            WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+              AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+              AND block_date >= CURRENT_DATE - INTERVAL '7' DAY
         ), 0)
       + COALESCE((
             SELECT SUM(amount_usd) FROM tokens_solana.transfers
@@ -130,13 +133,17 @@ prev_week AS (
     SELECT
         COALESCE((
             SELECT SUM(amount_usd) FROM nft.trades
-            WHERE blockchain IN ('base', 'polygon')
-              AND nft_contract_address IN (
-                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-              )
+            WHERE blockchain = 'base'
+              AND nft_contract_address = 0xbb5ec6fd4b61723bd45c399840f1d868840ca16f
               AND block_time >= NOW() - INTERVAL '14' DAY
               AND block_time <  NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(bytearray_to_uint256(substr(data, 33, 32))) / 1e6 FROM polygon.logs
+            WHERE contract_address = 0x5e4943373c2198625bd441ae0629e9e7b4fb4797
+              AND topic0 = 0xa6ae807740439025f50884311ce0f96f5c3809a8f7170f9459dab1b14c9d8afd
+              AND block_date >= CURRENT_DATE - INTERVAL '14' DAY
+              AND block_date <  CURRENT_DATE - INTERVAL '7' DAY
         ), 0)
       + COALESCE((
             SELECT SUM(amount_usd) FROM tokens_solana.transfers
