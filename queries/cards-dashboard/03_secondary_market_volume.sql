@@ -1,5 +1,6 @@
 -- Q3: Secondary Market Volume by Project (V2 — includes Phygitals royalties)
--- NFT secondary via nft.trades; CC secondary via CARDS DEX; Phygitals via royalty proxy
+-- NFT secondary via nft.trades; CC secondary via CARDS DEX
+-- Phygitals via royalty wallet (any token, not USDC-only — marketplace royalties are in SOL)
 -- Engine: Small for EVM, Medium for Solana DEX
 
 WITH beezie_secondary AS (
@@ -57,10 +58,14 @@ phygitals_royalties AS (
         approx_distinct(from_owner)     AS unique_buyers
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND to_owner = '2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5'
-      AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
-                             '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf')
+      AND amount_usd > 0
+      AND from_owner NOT IN (
+          '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+          '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf',
+          '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+          '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+      )
     GROUP BY 1
 ),
 
