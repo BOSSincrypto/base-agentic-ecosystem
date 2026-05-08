@@ -1,11 +1,9 @@
--- Q2: Market Share — Total Volume by Project
--- Pie chart: each project's share of total gacha/cards market
--- Color by chain grouping (Base=blue, Polygon=purple, Solana=green)
+-- Q2: Market Share — Total Volume by Project (V2 — 5 projects)
+-- Donut pie chart showing each project's share of the gacha market
+-- Engine: Medium (Solana queries)
 
 WITH beezie AS (
-    SELECT
-        'Beezie'  AS project,
-        'Base'    AS chain,
+    SELECT 'Beezie' AS project, 'Base' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM nft.trades
     WHERE blockchain = 'base'
@@ -14,9 +12,7 @@ WITH beezie AS (
 ),
 
 courtyard AS (
-    SELECT
-        'Courtyard'  AS project,
-        'Polygon'    AS chain,
+    SELECT 'Courtyard' AS project, 'Polygon' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM nft.trades
     WHERE blockchain = 'polygon'
@@ -25,15 +21,21 @@ courtyard AS (
 ),
 
 collector_crypt AS (
-    SELECT
-        'Collector Crypt'  AS project,
-        'Solana'           AS chain,
+    SELECT 'Collector Crypt' AS project, 'Solana' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND to_owner = 'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
       AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
           'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
           'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
@@ -43,33 +45,58 @@ collector_crypt AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
-          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
 ),
 
 upshot AS (
-    SELECT
-        'Upshot'  AS project,
-        'Base'    AS chain,
+    SELECT 'Upshot' AS project, 'Base' AS chain,
         COALESCE(SUM(CAST(value AS DOUBLE) / 1e6), 0) AS total_volume_usd
     FROM erc20_base.evt_Transfer
     WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
       AND "to" = 0x939dbbcf075de12d9d8df08ef727591ddebbc13b
       AND evt_block_time >= TIMESTAMP '2026-01-01'
+),
+
+phygitals AS (
+    SELECT 'Phygitals' AS project, 'Solana' AS chain,
+        COALESCE(SUM(amount_usd), 0) AS total_volume_usd
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND (
+          (to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e'
+           AND from_owner NOT IN ('62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+      )
 )
 
 SELECT
     project,
     chain,
-    ROUND(total_volume_usd, 2)              AS total_volume_usd,
-    project || ' (' || chain || ')'         AS label
+    ROUND(total_volume_usd, 2) AS total_volume_usd,
+    project || ' (' || chain || ')' AS label
 FROM (
     SELECT * FROM beezie
     UNION ALL SELECT * FROM courtyard
     UNION ALL SELECT * FROM collector_crypt
     UNION ALL SELECT * FROM upshot
+    UNION ALL SELECT * FROM phygitals
 )
 ORDER BY total_volume_usd DESC

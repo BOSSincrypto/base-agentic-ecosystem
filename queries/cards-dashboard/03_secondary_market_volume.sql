@@ -1,6 +1,6 @@
--- Q3: Secondary Market Volume by Project
--- Tracks NFT secondary sales via nft.trades (OpenSea, MagicEden, Blur, etc.)
--- Collector Crypt secondary = CARDS token DEX volume (dex_solana.trades)
+-- Q3: Secondary Market Volume by Project (V2 — includes Phygitals royalties)
+-- NFT secondary via nft.trades; CC secondary via CARDS DEX; Phygitals via royalty proxy
+-- Engine: Small for EVM, Medium for Solana DEX
 
 WITH beezie_secondary AS (
     SELECT
@@ -47,10 +47,28 @@ collector_crypt_dex AS (
     GROUP BY 1
 ),
 
+phygitals_royalties AS (
+    SELECT
+        date_trunc('week', block_time)  AS week,
+        'Phygitals'                     AS project,
+        'Solana'                        AS chain,
+        COALESCE(SUM(amount_usd), 0)    AS volume_usd,
+        COUNT(*)                        AS trades,
+        approx_distinct(from_owner)     AS unique_buyers
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND to_owner = '2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5'
+      AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                             '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf')
+    GROUP BY 1
+),
+
 combined AS (
     SELECT * FROM beezie_secondary
     UNION ALL SELECT * FROM courtyard_secondary
     UNION ALL SELECT * FROM collector_crypt_dex
+    UNION ALL SELECT * FROM phygitals_royalties
 )
 
 SELECT

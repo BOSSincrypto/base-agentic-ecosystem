@@ -1,8 +1,6 @@
--- Q1: Weekly Primary Volume by Project
--- Hero chart: stacked bar showing weekly volume in USD for each project
--- Also use for: 100% stacked area (market share % over time)
--- Viz 1: Stacked Bar (X: week, Y: volume_usd, Group: project)
--- Viz 2: 100% Stacked Area (normalized market share %)
+-- Q1: Weekly Primary Volume by Project (V2 — 5 projects)
+-- HERO CHART: stacked bar + 100% stacked area (market share % over time)
+-- Engine: Medium (Solana queries)
 
 WITH beezie AS (
     SELECT
@@ -38,9 +36,17 @@ collector_crypt AS (
         COALESCE(SUM(amount_usd), 0)      AS volume_usd
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND to_owner = 'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
       AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
           'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
           'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
@@ -50,10 +56,15 @@ collector_crypt AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
-          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
     GROUP BY 1
 ),
@@ -71,11 +82,37 @@ upshot AS (
     GROUP BY 1
 ),
 
+phygitals AS (
+    SELECT
+        date_trunc('week', block_time)    AS week,
+        'Phygitals'                       AS project,
+        'Solana'                          AS chain,
+        COALESCE(SUM(amount_usd), 0)      AS volume_usd
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND (
+          (to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e'
+           AND from_owner NOT IN ('62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+      )
+    GROUP BY 1
+),
+
 combined AS (
     SELECT * FROM beezie
     UNION ALL SELECT * FROM courtyard
     UNION ALL SELECT * FROM collector_crypt
     UNION ALL SELECT * FROM upshot
+    UNION ALL SELECT * FROM phygitals
 )
 
 SELECT

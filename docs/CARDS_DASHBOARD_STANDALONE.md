@@ -1,107 +1,149 @@
-# CARDS DASHBOARD — Отдельный Дашборд (Standalone)
+# CARDS MARKET DASHBOARD — Standalone Dune Dashboard (V2)
 
-> **Название дашборда:** `Cards Market: Where Physical Trading Cards Meet Blockchain`
-> **URL (предлагаемый):** `dune.com/ax1research/cards-market`
-> **Платформа:** Dune Analytics (DuneSQL / Trino)
-> **Чейны:** Base · Polygon · Solana (кросс-чейн)
-> **Поддерживается:** [AX1 Community](https://twitter.com/AX1ecosystem)
-> **Дата:** Май 2026
-
----
-
-## СОДЕРЖАНИЕ
-
-1. [Обзор и философия](#обзор-и-философия)
-2. [Отслеживаемые проекты и адреса](#отслеживаемые-проекты-и-адреса)
-3. [Collector Crypt — Gacha-архитектура](#collector-crypt--gacha-архитектура)
-4. [Структура дашборда](#структура-дашборда)
-5. [Text Widget C.H: Dashboard Header](#text-widget-ch-dashboard-header)
-6. [Text Widget C.S1: Market Pulse Section](#text-widget-cs1-market-pulse-section)
-7. [Query C.1: KPI Counters — Market at a Glance](#query-c1-kpi-counters--market-at-a-glance)
-8. [Text Widget C.S2: Capital Flow Section](#text-widget-cs2-capital-flow-section)
-9. [Query C.2: Weekly Volume — The Capital Race](#query-c2-weekly-volume--the-capital-race)
-10. [Query C.3: Market Share — Who Controls the Ecosystem?](#query-c3-market-share--who-controls-the-ecosystem)
-11. [Text Widget C.S3: Aftermarket Section](#text-widget-cs3-aftermarket-section)
-12. [Query C.4: Secondary Market — The Aftermarket](#query-c4-secondary-market--the-aftermarket)
-13. [Text Widget C.S4: Deep Dive Section](#text-widget-cs4-deep-dive-section)
-14. [Query C.5: Card Types — What's in the Pack?](#query-c5-card-types--whats-in-the-pack)
-15. [Query C.6: Collector Crypt Gacha — Inside the Machine](#query-c6-collector-crypt-gacha--inside-the-machine)
-16. [Text Widget C.F: Methodology & Sources](#text-widget-cf-methodology--sources)
-17. [Описания индикаторов](#описания-индикаторов)
-18. [Визуализации и оформление](#визуализации-и-оформление)
-19. [Карта Layout](#карта-layout)
-20. [Цветовая палитра](#цветовая-палитра)
-21. [Порядок действий на Dune — Чеклист](#порядок-действий-на-dune--чеклист)
-22. [V2 Roadmap](#v2-roadmap)
-23. [Известные ограничения](#известные-ограничения)
+> **Dashboard name:** `Cards Market: The Gacha Economy Across Chains`
+> **URL (proposed):** `dune.com/ax1research/cards-market`
+> **Platform:** Dune Analytics (DuneSQL / Trino)
+> **Chains:** Base · Polygon · Solana (cross-chain) · BNB (V2)
+> **Supported by:** [AX1 Community](https://twitter.com/AX1ecosystem)
+> **Date:** May 2026
+> **Engine:** Medium required for Solana queries; Small for EVM
 
 ---
 
-## ОБЗОР И ФИЛОСОФИЯ
+## CONTENTS
 
-### Что это
-
-Отдельный Dune дашборд, посвящённый рынку **токенизированных коллекционных карточек** (RWA Cards / Gacha). Физические трейдинг-карты (Pokémon, спорт, аниме) токенизируются на блокчейне как NFT с хранением в сертифицированных хранилищах (PSA, Brink's, Fanatics). Пользователи могут покупать «паки» (gacha), торговать на вторичке и реднуть физические карты.
-
-### Зачем отдельный дашборд
-
-Аналогия: дашборд **Virtuals Protocol** от AX1 стал де-факто стандартом для маркет-шера AI-агентов — сам Virtuals репостит данные. Задача: **создать аналогичный стандарт для Cards-рынка** — единое место, где видна доля каждого проекта, совокупные объёмы, динамика.
-
-### Ключевые принципы
-
-1. **Простота** — минимум запросов, максимум ясности
-2. **Достоверность** — только проверяемые on-chain данные
-3. **Market share** — прозрачная доля каждого проекта
-4. **Масс-маркет** — понятно людям без крипто-бэкграунда
-5. **Кросс-чейн** — все проекты на одном графике (Base + Polygon + Solana)
-6. **Визуальный нарратив** — каждый виджет рассказывает часть единой истории рынка
-
-### Конкурентные дашборды
-
-| Дашборд | URL | Покрытие | Слабость |
-|---------|-----|----------|----------|
-| Phygitals Dashboard | `dune.com/unit_tx/phygitals-dashboard` | Только Phygitals (Solana) | Один проект, один чейн |
-| Pokemon TCG RWA SOL | `dune.com/zkayape/pokemontcgsol` | CC + Phygitals + Emporium | Только Solana, нет Base/Polygon |
-| Sergey RUA — Courtyard | `dune.com/queries/7426512–7426783` | Только Courtyard (Polygon) | Один проект |
-| Hempanda — Upshot | `dune.com/queries/7425705` | Только Upshot (Base) | Один проект |
-
-**Наше преимущество:** ни один дашборд не объединяет ВСЕ проекты в одном месте с кросс-чейн маркет-шером. Это первый и единственный **aggregate view** всего рынка токенизированных карт.
+1. [Overview & Philosophy](#overview--philosophy)
+2. [Tracked Projects & Addresses](#tracked-projects--addresses)
+3. [Collector Crypt — Gacha Architecture](#collector-crypt--gacha-architecture)
+4. [Phygitals — Pack Architecture](#phygitals--pack-architecture)
+5. [Courtyard — Data Quality Note](#courtyard--data-quality-note)
+6. [Materialization Strategy](#materialization-strategy)
+7. [Dashboard Structure (Hempanda/AX1)](#dashboard-structure)
+8. [Text Widget C.H: Dashboard Header](#text-widget-ch-dashboard-header)
+9. [Text Widget C.S1: Market Pulse](#text-widget-cs1-market-pulse)
+10. [Query C.1: KPI Counters](#query-c1-kpi-counters--the-vital-signs)
+11. [Text Widget C.S2: Capital Flow](#text-widget-cs2-the-capital-race)
+12. [Query C.2: Weekly Volume — Hero Chart](#query-c2-weekly-volume--the-capital-race)
+13. [Query C.3: Market Share %](#query-c3-market-share--who-controls-the-ecosystem)
+14. [Text Widget C.S3: Aftermarket](#text-widget-cs3-the-aftermarket)
+15. [Query C.4: Secondary Market](#query-c4-secondary-market--life-after-the-pack)
+16. [Text Widget C.S4: Deep Dive](#text-widget-cs4-inside-the-machine)
+17. [Query C.5: Card Types — Niche Interest](#query-c5-card-types--whats-in-the-pack)
+18. [Query C.6: CC Gacha Plays by Rarity](#query-c6-collector-crypt-gacha--rarity-distribution)
+19. [Query C.7: CC Key Metrics P&L](#query-c7-collector-crypt-key-metrics--the-pl)
+20. [Text Widget C.F: Methodology & Sources](#text-widget-cf-methodology--sources)
+21. [Visualization Specs](#visualization-specs)
+22. [Layout Map](#layout-map)
+23. [Color Palette](#color-palette)
+24. [Implementation Checklist](#implementation-checklist)
+25. [V2 Roadmap](#v2-roadmap)
+26. [Known Limitations](#known-limitations)
 
 ---
 
-## ОТСЛЕЖИВАЕМЫЕ ПРОЕКТЫ И АДРЕСА
+## OVERVIEW & PHILOSOPHY
 
-| # | Project | Chain | Тип | Primary Address / Token | Источник данных |
-|---|---------|-------|-----|------------------------|-----------------|
-| 1 | **Beezie** | Base | NFT Claw Machine | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | `nft.trades` (blockchain='base') |
-| 2 | **Courtyard** | Polygon | NFT Marketplace | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | `nft.trades` (blockchain='polygon') |
-| 3 | **Collector Crypt** | Solana | Gacha + Token | Gacha: `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` | `tokens_solana.transfers` |
-| 4 | **Upshot** | Base | Prediction Cards | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | `erc20_base.evt_Transfer` |
-| 5 | **Phygitals** | Solana | Pack Opening | cNFTs (Metaplex Bubblegum) | V2 — требуется идентификация wallets |
+### What Is This
 
-### Вспомогательные адреса
+The first **cross-chain aggregate dashboard** for the tokenized trading cards market (RWA Cards / Gacha). Five projects across three blockchains — all in one place.
+
+### What Is Gacha and Why It Matters
+
+**For the mass market:** Gacha is the digital version of buying a sealed pack of trading cards — you pay, and you get random cards. Except now the cards are on a blockchain, backed 1:1 by real physical cards in certified vaults. You can hold them, trade them instantly, or redeem the actual physical card shipped to your door.
+
+**The market has three layers:**
+1. **Primary (Pack Sales / Gacha)** — Users pay USDC to open randomized packs or operate claw machines → receive NFT cards of varying rarity
+2. **Secondary (Trading)** — Cards trade freely on marketplaces (OpenSea, MagicEden, native platforms) like any NFT
+3. **Buyback (Instant Liquidity)** — Projects guarantee buyback at 85–90% of fair market value, creating a price floor
+
+**Why this is one of the next big things you're missing:** By Feb 2026, the tokenized cards market reached **$1.4B+ in cumulative volume** across platforms. Weekly gacha spending routinely exceeds $10M — surpassing traditional NFT marketplace volume on Solana since mid-2025. This is a new asset class being built in real time.
+
+### Why a Separate Dashboard
+
+The [Base Agentic Ecosystem](https://dune.com/ax1research/base-agentic-ecosystem) dashboard by AX1 became the de facto standard for AI agent market share — Virtuals Protocol itself reposts the data. **Goal: create the same standard for the Cards market** — a single source of truth where anyone can transparently see each project's market share, cumulative volumes, and growth dynamics.
+
+### Key Principles
+
+1. **Transparency** — Market share of every project visible at a glance
+2. **Cross-chain** — All projects on one chart regardless of chain (Base + Polygon + Solana)
+3. **Mass-market friendly** — Understandable without crypto background
+4. **On-chain only** — Only verifiable blockchain data, no self-reported numbers
+5. **Resource-efficient** — Materialized views for heavy Solana queries, medium engine where needed
+6. **Narrative-driven** — Every widget tells part of a story, not just displays numbers
+
+### Competitive Dashboards
+
+| Dashboard | URL | Coverage | Weakness |
+|-----------|-----|----------|----------|
+| Phygitals Dashboard | `dune.com/unit_tx/phygitals-dashboard` | Only Phygitals (Solana) | One project, one chain |
+| Pokemon TCG RWA SOL | `dune.com/zkayape/pokemontcgsol` | CC + Phygitals + Emporium (Solana) | Solana only, no Base/Polygon |
+| Beezie Dashboard | `dune.com/unit_tx/beezie-dashboard` | Only Beezie (Base) | One project |
+| Beezie (diam0nd) | `dune.com/diam0nd/beezie` | Only Beezie (Base) + referrals | One project |
+| Sergey RUA — Courtyard | `dune.com/queries/7426512–7426783` | Only Courtyard (Polygon) | One project |
+| Hempanda — Upshot | `dune.com/queries/7425705` | Only Upshot (Base) | One project |
+
+**Our advantage:** No existing dashboard combines ALL 5 projects into one cross-chain market share view. This is the **aggregate standard** for the entire tokenized cards market.
+
+---
+
+## TRACKED PROJECTS & ADDRESSES
+
+| # | Project | Chain | Type | How Volume Is Tracked | Data Source |
+|---|---------|-------|------|----------------------|-------------|
+| 1 | **Beezie** | Base | NFT Claw Machine | NFT sales via marketplaces | `nft.trades` (blockchain='base') |
+| 2 | **Courtyard** | Polygon | NFT Marketplace | NFT sales via Seaport ⚠️ | `nft.trades` (blockchain='polygon') |
+| 3 | **Collector Crypt** | Solana | Gacha Packs + CARDS Token | USDC inflows to gacha wallets | `tokens_solana.transfers` |
+| 4 | **Upshot** | Base | Prediction Cards | USDC deposits to contract | `erc20_base.evt_Transfer` |
+| 5 | **Phygitals** | Solana | Pack Opening + Claw + Lucky Draw | USDC inflows to gacha wallets | `tokens_solana.transfers` |
+
+### Key Token Addresses
 
 | Token | Chain | Address |
 |-------|-------|---------|
-| USDC (Base) | Base | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
-| USDC (Polygon) | Polygon | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` |
-| USDC (Solana) | Solana | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
-| CARDS token | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` |
+| USDC | Base | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| USDC | Polygon | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` |
+| USDC | Solana | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| CARDS | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` |
+
+### Project Addresses
+
+| Project | Address / Contract | Role |
+|---------|-------------------|------|
+| **Beezie** | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | NFT contract (Base) |
+| **Courtyard** | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | NFT contract (Polygon, Seaport) |
+| **Upshot** | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | Deposit contract (Base) |
+
+### Market Scale (Caggy / DefiLlama, Feb 2026)
+
+| Project | All-Time Volume | Gross Revenue | Inventory |
+|---------|----------------|---------------|-----------|
+| Courtyard | $723.9M | $100.2M | 230K certs |
+| Collector Crypt | $579.6M | $30.3M | 51K certs |
+| Phygitals | $136.1M | $9.2M | ~36K certs |
+| Beezie | $28.2M (Base) | $14.3M | 18K certs |
 
 ---
 
-## COLLECTOR CRYPT — GACHA-АРХИТЕКТУРА
+## COLLECTOR CRYPT — GACHA ARCHITECTURE
 
-Данные из команды (Sergey RUA, cont_2.md). Collector Crypt использует gacha-механику на Solana.
+Source: team context (Sergey RUA, cont_2.md) + DefiLlama adapter (`fees/collector-crypt/index.ts`).
 
-### Как работает gacha
+### How Gacha Works
 
-1. Пользователь платит USDC → gacha-контракт (`GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3`)
-2. VRF выбирает случайный пул редкости (Low → Legend)
-3. Карта переводится из пула редкости → кошелёк пользователя
-4. Пользователь может держать, торговать на вторичке или реднуть физическую карту
+1. User pays USDC → one of 3 gacha wallets
+2. VRF selects random rarity pool (Low → Legend)
+3. Card transfers from rarity pool wallet → user wallet
+4. User can hold, trade secondary, or redeem physical card
 
-### Кошельки пулов редкости
+### Gacha Wallets (USDC receivers)
+
+| Wallet | Address |
+|--------|---------|
+| Gacha Primary | `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` |
+| Gacha Secondary | `GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z` |
+| Gacha Tertiary | `96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s` |
+
+### Rarity Pool Wallets (card distributors)
 
 | Rarity | Wallet 1 | Wallet 2 |
 |--------|----------|----------|
@@ -109,120 +151,217 @@
 | **Mid** | `Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney` | `miDtj3vgdxVykHzRyFwyG8MXpvK8eQqamSLVdBr7WPt` |
 | **High** | `HighJBfnAaqH9cKkeMErQFJZ4ATxQJwxqFupX6zaKTns` | `HiGHqwYddP5N2waqUmXPdaASpMpUEvfqPr2fSawctEb` |
 | **Epic** | `EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF` | `epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn` |
-| **Legend** | `LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf` | — |
+| **Legend** | `LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf` | `LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj` |
 | **One** | `onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs` | — |
-| **Sport** | `SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD` | — |
+| **Sport** | `SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD` | `SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8` |
 
-### Внутренние адреса (исключаются из аналитики)
+### Internal Addresses (excluded from analytics)
 
-| Адрес | Роль |
-|-------|------|
-| `DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd` | Fee wallet |
+| Address | Role |
+|---------|------|
+| `DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd` | Fee/royalty wallet |
 | `cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi` | CC internal |
 | `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` | Gacha contract |
+| `GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z` | Gacha contract |
+| `96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s` | Gacha contract |
+| `BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M` | Internal ops |
+| `21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8` | Internal ops |
+| `DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE` | Internal ops |
+| `HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u` | Internal ops |
+| `Cc4pHGnoaRWL1WnHsV517T3YvQn5gLDBMiuVXkF9rZhK` | Internal (buyback exclusion) |
+| `8373hLiAEXxaJ3oV7SRzx4KHwurEg9rEG98tUPj1sdtX` | Internal (buyback exclusion) |
 
-### Существующие публичные queries
+### Existing Public Queries (reference)
 
-| Query | URL | Описание | Движок |
-|-------|-----|----------|--------|
-| Plays by Rarity | Giedi (public) | Gacha-играх по редкости/день | Нужен medium (таймаут на small) |
-| Monthly Retention | `dune.com/queries/7432781` | Ретеншн игроков | С 01.2026 из-за таймаута |
-| Key Metrics | `dune.com/queries/7433053` | USDC P&L (spend, outflows, revenue, fees) | С 01.2026 |
+| Query | Source | Description | Engine |
+|-------|--------|-------------|--------|
+| Plays by Rarity | Giedi (public) | Daily gacha by rarity pool | Medium required (timeout on small) |
+| Monthly Retention | `dune.com/queries/7432781` | Monthly cohort retention | From 01.2026 (timeout) |
+| Key Metrics P&L | `dune.com/queries/7433053` | Weekly USDC P&L (spend, outflows, fees) | From 01.2026 |
 
 ---
 
-## СТРУКТУРА ДАШБОРДА
+## PHYGITALS — PACK ARCHITECTURE
 
-Дашборд разделён на **4 тематических секции** с text-разделителями, плюс заголовок и футер. Каждая секция рассказывает свою часть истории рынка.
+Source: DefiLlama adapter (`fees/phygitals/index.ts`) + Phygitals docs.
 
-| Секция | Нарратив | Виджеты |
-|--------|----------|---------|
-| **Header** | Что такое рынок токенизированных карт и зачем за ним следить | 1 text widget |
-| **Market Pulse** | Мгновенный снимок здоровья рынка: объём, пользователи, лидер, динамика | 1 text + 4 counters |
-| **Capital Flow** | Куда текут деньги? Недельная динамика + общие доли рынка | 1 text + 2 charts |
-| **Aftermarket** | Вторичный рынок: кто торгует после покупки паков? | 1 text + 1 chart |
-| **Deep Dive** | Нишевые данные: типы карт + детальная механика gacha CC | 1 text + 2 charts |
-| **Footer** | Методология, источники, определения, ограничения | 1 text widget |
+### How Phygitals Works
 
-**Итого: 6 queries · 6 text widgets · 4 counters · 5 charts = 21 виджет в 12 рядах**
+1. User pays USDC → gacha/pack wallet to open randomized packs ($1–$250 tiers)
+2. Receives compressed NFT (cNFT via Metaplex Bubblegum) representing a graded physical card
+3. Can trade on marketplace (Tensor, MagicEden), hold, or redeem physical card
+4. Buyback at 85–90% of FMV via platform
+
+### Revenue Wallets (USDC receivers)
+
+| Wallet | Address | Role |
+|--------|---------|------|
+| Main Gacha | `62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS` | Primary pack purchase receiver |
+| Secondary Gacha | `42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e` | Secondary pack receiver |
+| Lucky Draw | `4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt` | Lucky Draw fees |
+| Royalties | `2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5` | Marketplace royalties/fees |
+
+### Internal Exclusions
+
+| Address | Role |
+|---------|------|
+| `42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e` | Internal rebalancing |
+| `5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf` | Internal ops |
+
+### Data Notes
+- Token: USDC on Solana (`EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`)
+- Table: `tokens_solana.transfers`
+- Primary volume = USDC to gacha wallets (main + secondary) + lucky draw fees
+- Buyback = USDC sent FROM main gacha wallet back to users
+- Start date: 2025-03-16
+- Supported TCGs: Pokémon (primary), Baseball, Football, Basketball, One Piece, Yu-Gi-Oh!, Dragon Ball
+- NFT tech: Compressed NFTs (cNFTs) via Metaplex Bubblegum protocol
+
+---
+
+## COURTYARD — DATA QUALITY NOTE
+
+⚠️ **Important: Courtyard data is provisional and likely undercounts true volume.**
+
+### The Issue
+
+Courtyard operates its own marketplace on Polygon using the Seaport protocol. The Dune Spellbook `nft.trades` table currently does NOT have a Courtyard-specific marketplace model — there is an [open PR (#8704)](https://github.com/duneanalytics/spellbook/pull/8704) to add it.
+
+This means:
+- **What we capture:** Courtyard NFTs traded on OTHER marketplaces (OpenSea on Polygon) via existing Seaport model
+- **What we miss:** Trades on Courtyard's own native marketplace (majority of volume)
+- **Impact:** Our on-chain numbers for Courtyard will be significantly lower than reported volumes ($723.9M all-time per Caggy/DefiLlama)
+
+### Current Approach
+
+Keep `nft.trades` with `nft_contract_address = 0x251BE3A...` as V1 source, with prominent disclaimer. This captures SOME secondary market activity but is not comprehensive.
+
+### V2 Fix Options
+
+1. Wait for Spellbook PR #8704 to merge → Courtyard will appear properly in `nft.trades`
+2. Parse raw Seaport events from `polygon.logs` for Courtyard's marketplace contract
+3. Use Courtyard API data (off-chain, less trustworthy for a Dune dashboard)
+
+---
+
+## MATERIALIZATION STRATEGY
+
+### Why Materialization Is Needed
+
+Solana queries (Collector Crypt, Phygitals) scan `tokens_solana.transfers` — one of the heaviest tables on Dune. Cross-chain aggregation (Base + Polygon + Solana) multiplies the load.
+
+### Approach
+
+| Query | Engine | Strategy |
+|-------|--------|----------|
+| Q1: Weekly Volume | **Medium** | `block_date >= DATE '2026-01-01'` filter; weekly aggregation reduces rows |
+| Q2: Market Share | **Medium** | Same data as Q1, could use materialized view of Q1 |
+| Q3: Secondary Market | Small | EVM nft.trades only (fast); Solana DEX for CARDS token |
+| Q4: Card Types | **Medium** | Heavy Solana scan of rarity pool transfers |
+| Q5: KPI Counters | **Medium** | Aggregates all chains; shares CTEs with Q1 |
+| Q6: CC Gacha Plays | **Medium** | From Giedi's query; timeout on small engine confirmed |
+| Q7: CC P&L | **Medium** | Multi-wallet USDC flow aggregation |
+
+### Optimization Tips
+
+1. Always use `block_date >= DATE '2026-01-01'` for Solana queries (partition pruning)
+2. Use `approx_distinct()` instead of `COUNT(DISTINCT ...)` for unique users
+3. Weekly aggregation (`date_trunc('week', ...)`) reduces output rows
+4. Exclude incomplete current week: `WHERE week < date_trunc('week', NOW())`
+5. Consider Dune materialized views for Q1 data if refresh rate allows
+6. On Dune, set query schedule to refresh every 6–12 hours (not live)
+
+---
+
+## DASHBOARD STRUCTURE
+
+Based on Hempanda/AX1 proposal. Five core sections following the natural flow: overview → volume → share → aftermarket → deep dive.
+
+| Section | Narrative | Widgets |
+|---------|----------|---------|
+| **Header** | What is gacha? Why does the cards market matter? | 1 text widget |
+| **Market Pulse** | Instant health check: volume, users, leader, momentum | 1 text + 5 counters |
+| **Capital Race** | Where does the money go? Weekly flows + market share | 1 text + 3 charts |
+| **Aftermarket** | What happens after you open the pack? Secondary trading | 1 text + 1 chart |
+| **Inside the Machine** | Niche data: card types + CC gacha rarity + P&L | 1 text + 3 charts |
+| **Footer** | Methodology, sources, limitations, V2 preview | 1 text widget |
+
+**Total: 7 queries · 6 text widgets · 5 counters · 7 charts = 25 widgets in 14 rows**
 
 ---
 
 ## TEXT WIDGET C.H: DASHBOARD HEADER
 
-**Ряд C-1:** Full width (12 колонок). Первое, что видит пользователь.
+**Row C-1:** Full width (12 columns). First thing users see.
 
-**Как добавить:** Edit dashboard → Add text widget → вставить текст → растянуть на 12 колонок.
+**How to add:** Edit dashboard → Add text widget → paste text → stretch to 12 columns.
 
-**Текст (скопируй как есть):**
+**Text (copy as-is):**
 
 ```markdown
-# Cards Market: Where Physical Trading Cards Meet Blockchain
+# Cards Market: The Gacha Economy Across Chains
 
-**The first cross-chain dashboard for tokenized collectible cards.** Physical Pokémon, sports, and anime trading cards — graded, vaulted, and tokenized as NFTs across Base, Polygon, and Solana. Each digital token is backed 1:1 by a real card stored in certified vaults (PSA, Brink's, Fanatics).
+**The first cross-chain dashboard for the $1.4B+ tokenized trading cards market.** Physical Pokémon, sports, and anime trading cards — graded, vaulted, and tokenized as digital assets across Base, Polygon, and Solana.
 
-This is not speculation — it's a new asset class being built in real time.
+### How it works — in 30 seconds
 
-**How the card market works:**
-- **Buy Packs / Play the Machine** — Users pay USDC to open randomized packs (gacha) or operate claw machines, receiving NFT cards of varying rarity
-- **Trade on the Secondary Market** — Cards trade freely on OpenSea, MagicEden, or native marketplaces just like any NFT
-- **Redeem for Physical** — At any time, burn the NFT and receive the actual graded card shipped to your door
-- **Buyback Floor** — Some projects guarantee instant buyback at 85–90% of fair market value, creating a price floor
+Imagine buying a sealed pack of Pokémon cards — except digitally, on a blockchain. You pay USDC, get random cards backed 1:1 by real graded cards in insured vaults. You can:
 
-**Four projects. Three chains. One market.**
+- 🎰 **Open Packs / Play the Machine** — Pay USDC, get random NFT cards (this is "gacha")
+- 🔄 **Trade Instantly** — Sell on OpenSea, MagicEden, or native marketplaces
+- 📦 **Redeem Physical** — Burn the NFT, receive the actual graded card
+- 💰 **Buyback Floor** — Most projects guarantee 85–90% of fair market value back
 
-| Project | Chain | Mechanic | What It Does |
+### Five projects. Three chains. One market.
+
+| Project | Chain | Mechanic | Total Volume |
 |---------|-------|----------|-------------|
-| **Beezie** | Base | NFT Claw Machine | Physical cards from digital claw grabs — gamified, social, viral |
-| **Courtyard** | Polygon | NFT Marketplace | Premium graded cards tokenized and traded — the "blue chip" approach |
-| **Collector Crypt** | Solana | Gacha Packs | Randomized card packs with 7 rarity tiers (Low → Legend) — pure gacha |
-| **Upshot** | Base | Prediction Market | Card-backed prediction positions with USDC deposits |
+| **Courtyard** | Polygon | NFT Marketplace — the "blue chip" of RWA cards | $723.9M |
+| **Collector Crypt** | Solana | Gacha packs with 7 rarity tiers + $CARDS token | $579.6M |
+| **Phygitals** | Solana | Pack opening + claw + lucky draw — 60K+ cards tokenized | $136.1M |
+| **Beezie** | Base | NFT Claw Machine — gamified, social, viral | $28.2M |
+| **Upshot** | Base | Prediction market with card-backed USDC positions | — |
 
-> Built by [AX1 Research](https://twitter.com/AX1ecosystem) — the team behind the [Base Agentic Ecosystem](https://dune.com/ax1research/base-agentic-ecosystem) dashboard. Data: 2026 YTD | On-chain USDC inflows + NFT trades | Updated weekly
+> Built by [AX1 Research](https://twitter.com/AX1ecosystem) · Data: 2026 YTD · On-chain USDC inflows + NFT trades · Updated weekly
 ```
 
 ---
 
-## TEXT WIDGET C.S1: MARKET PULSE SECTION
+## TEXT WIDGET C.S1: MARKET PULSE
 
-**Ряд C-2:** Full width (12 колонок). Разделитель перед KPI-каунтерами.
-
-**Текст (скопируй как есть):**
+**Row C-2:** Full width (12 columns).
 
 ```markdown
 ---
 
 ## Market Pulse: The Vital Signs
 
-Four numbers that tell you everything about the health of the tokenized cards market. Total capital committed, unique participants, the current market leader, and week-over-week momentum — all derived from on-chain data across three blockchains.
+Five numbers that tell you everything about the health of the tokenized cards market. Total capital committed, unique participants, the current market leader, active projects, and week-over-week momentum — all derived from on-chain data across three blockchains.
 
 > Think of these as the EKG of a market being born. Green means growing. Flat means consolidating. Red means we have a problem.
 ```
 
 ---
 
-## QUERY C.1: KPI COUNTERS — MARKET AT A GLANCE
+## QUERY C.1: KPI COUNTERS — THE VITAL SIGNS
 
-### Что он делает
+### What It Does
 
-Один консолидированный запрос для **4 ключевых цифр** в верхней части дашборда. Агрегирует данные со всех 4 проектов + вычисляет WoW-динамику для NFT-рынков (Base + Polygon).
+Single query for **5 key numbers** at the top. Aggregates all 5 projects across 3 chains.
 
-### Описание для дашборда
+### Dashboard Description
 
-> **Dashboard description:** The heartbeat of the tokenized cards market in four numbers — total capital inflows, active participants, who's winning, and whether the market is accelerating or cooling down. Cross-chain: Base + Polygon + Solana.
+> **Title:** `Cards Market — KPI Counters (V2)`
+> **Description:** The heartbeat of the tokenized cards market — total capital inflows, active participants, who's leading, and whether the market is accelerating or slowing. Cross-chain: Base + Polygon + Solana.
 
-### Название при сохранении
+### SQL
 
-`Cards Market - KPI Counters (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/05_kpi_counters.sql`
+**File:** `queries/cards-dashboard/05_kpi_counters.sql`
 
 ```sql
--- Q5: Combined KPI Counters
--- 4 key numbers for the top of the dashboard
--- Columns: total_volume_usd, unique_users, top_project, wow_growth_pct
+-- Q5: Combined KPI Counters (V2 — 5 projects)
+-- 5 key numbers: total_volume_usd, unique_users, top_project, active_projects, wow_growth_pct
+-- Engine: Medium (Solana queries)
 
 WITH beezie_vol AS (
     SELECT
@@ -246,13 +385,21 @@ courtyard_vol AS (
 
 cc_vol AS (
     SELECT
-        COALESCE(SUM(amount_usd), 0)   AS vol,
-        approx_distinct(from_owner)    AS users
+        COALESCE(SUM(amount_usd), 0) AS vol,
+        approx_distinct(from_owner)  AS users
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND to_owner = 'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
       AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
           'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
           'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
@@ -262,10 +409,15 @@ cc_vol AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
-          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
 ),
 
@@ -279,198 +431,152 @@ upshot_vol AS (
       AND evt_block_time >= TIMESTAMP '2026-01-01'
 ),
 
-this_week AS (
-    SELECT COALESCE(SUM(amount_usd), 0) AS vol
-    FROM nft.trades
-    WHERE blockchain IN ('base', 'polygon')
-      AND nft_contract_address IN (
-          0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-          0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      )
-      AND block_time >= NOW() - INTERVAL '7' DAY
-),
-
-prev_week AS (
-    SELECT COALESCE(SUM(amount_usd), 0) AS vol
-    FROM nft.trades
-    WHERE blockchain IN ('base', 'polygon')
-      AND nft_contract_address IN (
-          0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
-          0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
-      )
-      AND block_time >= NOW() - INTERVAL '14' DAY
-      AND block_time <  NOW() - INTERVAL '7' DAY
-),
-
-totals AS (
+phygitals_vol AS (
     SELECT
-        (SELECT vol FROM beezie_vol)
-      + (SELECT vol FROM courtyard_vol)
-      + (SELECT vol FROM cc_vol)
-      + (SELECT vol FROM upshot_vol) AS total_volume,
-        (SELECT users FROM beezie_vol)
-      + (SELECT users FROM courtyard_vol)
-      + (SELECT users FROM cc_vol)
-      + (SELECT users FROM upshot_vol) AS total_users
+        COALESCE(SUM(amount_usd), 0) AS vol,
+        approx_distinct(from_owner)  AS users
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND (
+          (to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e'
+           AND from_owner NOT IN ('62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+      )
 ),
 
-top AS (
+all_projects AS (
     SELECT project, vol FROM (
         VALUES
             ('Beezie',          (SELECT vol FROM beezie_vol)),
             ('Courtyard',       (SELECT vol FROM courtyard_vol)),
             ('Collector Crypt', (SELECT vol FROM cc_vol)),
-            ('Upshot',          (SELECT vol FROM upshot_vol))
+            ('Upshot',          (SELECT vol FROM upshot_vol)),
+            ('Phygitals',       (SELECT vol FROM phygitals_vol))
     ) AS t(project, vol)
-    ORDER BY vol DESC
-    LIMIT 1
+),
+
+this_week AS (
+    SELECT
+        COALESCE((
+            SELECT SUM(amount_usd) FROM nft.trades
+            WHERE blockchain IN ('base', 'polygon')
+              AND nft_contract_address IN (
+                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
+                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
+              )
+              AND block_time >= NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(amount_usd) FROM tokens_solana.transfers
+            WHERE block_date >= CURRENT_DATE - INTERVAL '7' DAY
+              AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+              AND to_owner IN (
+                  'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+                  'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+                  '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+              )
+        ), 0) AS vol
+),
+
+prev_week AS (
+    SELECT
+        COALESCE((
+            SELECT SUM(amount_usd) FROM nft.trades
+            WHERE blockchain IN ('base', 'polygon')
+              AND nft_contract_address IN (
+                  0xbb5ec6fd4b61723bd45c399840f1d868840ca16f,
+                  0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD
+              )
+              AND block_time >= NOW() - INTERVAL '14' DAY
+              AND block_time <  NOW() - INTERVAL '7' DAY
+        ), 0)
+      + COALESCE((
+            SELECT SUM(amount_usd) FROM tokens_solana.transfers
+            WHERE block_date >= CURRENT_DATE - INTERVAL '14' DAY
+              AND block_date <  CURRENT_DATE - INTERVAL '7' DAY
+              AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+              AND to_owner IN (
+                  'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+                  'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+                  '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+              )
+        ), 0) AS vol
 )
 
 SELECT
-    ROUND((SELECT total_volume FROM totals), 0)  AS total_volume_usd,
-    (SELECT total_users FROM totals)              AS unique_users,
-    (SELECT project FROM top)                     AS top_project,
+    ROUND((SELECT SUM(vol) FROM all_projects), 0) AS total_volume_usd,
+    (SELECT users FROM beezie_vol)
+  + (SELECT users FROM courtyard_vol)
+  + (SELECT users FROM cc_vol)
+  + (SELECT users FROM upshot_vol)
+  + (SELECT users FROM phygitals_vol)               AS unique_users,
+    (SELECT project FROM all_projects ORDER BY vol DESC LIMIT 1) AS top_project,
+    (SELECT COUNT(*) FROM all_projects WHERE vol > 0) AS active_projects,
     ROUND(
         100.0 * ((SELECT vol FROM this_week) - (SELECT vol FROM prev_week))
         / NULLIF((SELECT vol FROM prev_week), 0)
-    , 1)                                          AS wow_growth_pct
+    , 1)                                              AS wow_growth_pct
 ```
 
-### Как оформить: 4 Counter Widgets (РЯД C-3)
+### Visualizations (5 counters)
 
-Из одного запроса создаём **4 отдельных Counter визуализации**. Каждый каунтер — отдельный виджет по 3 колонки (3+3+3+3 = 12).
-
-**Визуализация C.1a — "Total Market Volume" (Counter, 3 колонки)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Counter** |
-| Column | `total_volume_usd` |
-| Title | `Total Market Volume` |
-| Description | `All USDC inflows across 4 projects and 3 chains since Jan 2026` |
-| Prefix | `$` |
-| Suffix | — |
-| Decimals | 0 |
-| Color | Amber `#F59E0B` |
-
-**Как создать в Dune:**
-1. Открой сохранённый запрос → Add visualization → **Counter**
-2. Column: `total_volume_usd`
-3. Row: 1
-4. Title: `Total Market Volume`
-5. Prefix: `$`
-6. Цвет: `#F59E0B`
+| Counter | Column | Format | Position |
+|---------|--------|--------|----------|
+| **Total Capital Inflows** | `total_volume_usd` | `$X.XM` prefix `$` | Row C-3, col 1–3 |
+| **Unique Participants** | `unique_users` | `X,XXX` | Row C-3, col 4–5 |
+| **Market Leader** | `top_project` | Text | Row C-3, col 6–8 |
+| **Active Projects** | `active_projects` | `X / 5` | Row C-3, col 9–10 |
+| **WoW Momentum** | `wow_growth_pct` | `+X.X%` suffix `%` | Row C-3, col 11–12 |
 
 ---
 
-**Визуализация C.1b — "Unique Collectors" (Counter, 3 колонки)**
+## TEXT WIDGET C.S2: THE CAPITAL RACE
 
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Counter** |
-| Column | `unique_users` |
-| Title | `Unique Collectors` |
-| Description | `Distinct wallet addresses that bought, traded, or deposited across all projects` |
-| Prefix | — |
-| Suffix | — |
-| Decimals | 0 |
-| Color | Purple `#8B5CF6` |
-
-**Как создать в Dune:**
-1. Add visualization → **Counter**
-2. Column: `unique_users`
-3. Title: `Unique Collectors`
-4. Цвет: `#8B5CF6`
-
----
-
-**Визуализация C.1c — "Market Leader" (Counter, 3 колонки)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Counter** |
-| Column | `top_project` |
-| Title | `Market Leader` |
-| Description | `Project with the highest total volume YTD — the current king of the cards market` |
-| Prefix | — |
-| Suffix | — |
-| Type | String |
-| Color | Green `#10B981` |
-
-**Как создать в Dune:**
-1. Add visualization → **Counter**
-2. Column: `top_project`
-3. Title: `Market Leader`
-4. Цвет: `#10B981`
-
----
-
-**Визуализация C.1d — "Weekly Momentum" (Counter, 3 колонки)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Counter** |
-| Column | `wow_growth_pct` |
-| Title | `Weekly Momentum` |
-| Description | `Week-over-week volume change for NFT markets (Base + Polygon). Green = growing, Red = cooling` |
-| Prefix | — |
-| Suffix | `%` |
-| Decimals | 1 |
-| Color | Green `#10B981` if positive, Red `#EF4444` if negative |
-
-**Как создать в Dune:**
-1. Add visualization → **Counter**
-2. Column: `wow_growth_pct`
-3. Title: `Weekly Momentum`
-4. Suffix: `%`
-5. Цвет: зависит от значения. Если число положительное → зелёный `#10B981`. Если отрицательное → красный `#EF4444`
-
----
-
-## TEXT WIDGET C.S2: CAPITAL FLOW SECTION
-
-**Ряд C-4:** Full width (12 колонок). Разделитель перед основными графиками.
-
-**Текст (скопируй как есть):**
+**Row C-4:** Full width (12 columns).
 
 ```markdown
 ---
 
-## Capital Flow: Where the Money Goes
+## The Capital Race: Where Users Put Their Money
 
-Every dollar entering the tokenized cards market leaves a trace on-chain. The charts below reveal two things: **velocity** (how much capital flows in each week) and **dominance** (who captures the largest share of that capital).
+The heart of the dashboard. Weekly stacked bars show raw capital inflows — you see exactly how much money flows into each project. The normalized chart below reveals the hidden story: market share shifts that volume alone can't show.
 
-The stacked bars show weekly inflows by project — think of it as the scoreboard of a race that resets every Monday. The pie chart shows the cumulative result: after all the weekly races, who's actually winning the war?
-
-**Reading the colors:** Each project is colored by its home chain — **blue family for Base**, **purple for Polygon**, **green for Solana**. When you see a color dominating, you're seeing a chain dominating.
+> A project can grow in absolute volume while losing market share. Watch both charts to see the full picture.
 ```
 
 ---
 
 ## QUERY C.2: WEEKLY VOLUME — THE CAPITAL RACE
 
-### Что он делает
+### What It Does
 
-Главный график дашборда (HERO CHART). Показывает **недельные объёмы входящих USDC** по каждому проекту. Stacked bars наглядно показывают, кто забирает наибольшую долю каждую неделю. Из этого же запроса можно создать 100% Stacked Area (market share % over time).
+**HERO CHART.** Weekly stacked bar of ALL 5 projects. Same query also powers the 100% stacked area (market share % over time). Two visualizations from one query.
 
-### Описание для дашборда
+### Dashboard Description
 
-> **Dashboard description:** The weekly spending race across all four projects. Each bar represents one week of capital inflows in USD. Watch which colors grow and shrink — that's market share shifting in real time. Beezie and Courtyard trade via NFT marketplaces, Collector Crypt via gacha packs (Solana USDC), Upshot via USDC deposits.
+> **Title:** `Cards Market — Weekly Volume by Project (V2)`
+> **Viz 1 Title:** `The Capital Race: Weekly Inflows by Project`
+> **Viz 1 Description:** Raw capital flowing into the tokenized cards market every week. Each layer is a project — the taller the stack, the bigger the market. All volumes in USDC equivalent.
+> **Viz 2 Title:** `Market Share Drift: Who's Gaining Ground?`
+> **Viz 2 Description:** Same data, different lens. Each project's share of total weekly volume, normalized to 100%. When a color band grows, that project is capturing more of the market — even if total volume is flat.
 
-### Название при сохранении
+### SQL
 
-`Cards Market - Weekly Volume: The Capital Race (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/01_weekly_volume_by_project.sql`
+**File:** `queries/cards-dashboard/01_weekly_volume_by_project.sql`
 
 ```sql
--- Q1: Weekly Primary Volume by Project
--- Hero chart: stacked bar showing weekly volume in USD for each project
--- Also use for: 100% stacked area (market share % over time)
--- Viz 1: Stacked Bar (X: week, Y: volume_usd, Group: project)
--- Viz 2: 100% Stacked Area (normalized market share %)
+-- Q1: Weekly Primary Volume by Project (V2 — 5 projects)
+-- HERO CHART: stacked bar + 100% stacked area (market share % over time)
+-- Engine: Medium (Solana queries)
 
 WITH beezie AS (
     SELECT
@@ -506,9 +612,17 @@ collector_crypt AS (
         COALESCE(SUM(amount_usd), 0)      AS volume_usd
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND to_owner = 'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
       AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
           'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
           'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
@@ -518,10 +632,15 @@ collector_crypt AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
-          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
     GROUP BY 1
 ),
@@ -539,11 +658,37 @@ upshot AS (
     GROUP BY 1
 ),
 
+phygitals AS (
+    SELECT
+        date_trunc('week', block_time)    AS week,
+        'Phygitals'                       AS project,
+        'Solana'                          AS chain,
+        COALESCE(SUM(amount_usd), 0)      AS volume_usd
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND (
+          (to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e'
+           AND from_owner NOT IN ('62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+      )
+    GROUP BY 1
+),
+
 combined AS (
     SELECT * FROM beezie
     UNION ALL SELECT * FROM courtyard
     UNION ALL SELECT * FROM collector_crypt
     UNION ALL SELECT * FROM upshot
+    UNION ALL SELECT * FROM phygitals
 )
 
 SELECT
@@ -556,96 +701,54 @@ WHERE week < date_trunc('week', NOW())
 ORDER BY week, project
 ```
 
-### Как оформить: 2 визуализации (РЯДЫ C-5, C-6)
+### Visualization 1: Stacked Bar
 
-**Визуализация C.2a — "The Capital Race: Weekly Inflows by Project" (Stacked Bar, РЯД C-5, 12 колонок)**
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Stacked Bar |
+| X-axis | `week` (date) |
+| Y-axis | `volume_usd` |
+| Group by | `project` |
+| Colors | Beezie=#3B82F6, Courtyard=#8B5CF6, CC=#10B981, Upshot=#60A5FA, Phygitals=#34D399 |
+| Height | 400px |
 
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Stacked Bar Chart** |
-| X-axis | `week` (Date) |
-| Y-axis | `volume_usd` (USD) |
-| Group By | `project` |
-| Stacking | Normal (stacked, not 100%) |
-| Высота | 400px |
-| Заголовок | `The Capital Race: Weekly Inflows by Project` |
-| Описание | `Total USDC entering the cards market each week, broken down by project. Beezie & Courtyard = NFT trade volume. Collector Crypt = gacha pack purchases. Upshot = USDC deposits. Incomplete current week excluded.` |
+### Visualization 2: 100% Stacked Area
 
-**Цвета по проектам (chain-grouping):**
-
-| Project | Chain | Color | HEX |
-|---------|-------|-------|-----|
-| Beezie | Base | Electric Blue | `#3B82F6` |
-| Upshot | Base | Sky Blue | `#60A5FA` |
-| Courtyard | Polygon | Royal Purple | `#8B5CF6` |
-| Collector Crypt | Solana | Emerald Green | `#10B981` |
-
-**Как создать в Dune:**
-1. Открой запрос → New visualization → **Bar Chart**
-2. X-axis: `week`
-3. Y-axis: `volume_usd`
-4. Group by: `project`
-5. Stacking: **Stacked**
-6. Назначь цвета каждому проекту по таблице выше
-7. Title: `The Capital Race: Weekly Inflows by Project`
-8. Y-axis label: `Volume (USD)`
-
----
-
-**Визуализация C.2b — "Market Share Drift: Who's Gaining Ground?" (100% Stacked Area, РЯД C-6, 12 колонок)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **100% Stacked Area Chart** |
-| X-axis | `week` (Date) |
-| Y-axis | `volume_usd` (normalized to 100%) |
-| Group By | `project` |
-| Stacking | **Percent** (100%) |
-| Высота | 300px |
-| Заголовок | `Market Share Drift: Who's Gaining Ground?` |
-| Описание | `Same data as above, but normalized to 100%. Watch the bands widen and narrow — that's market share shifting. A band growing from 20% to 40% means that project doubled its relative dominance, regardless of absolute volume.` |
-
-**Цвета:** Те же, что и C.2a (chain-grouping).
-
-**Как создать в Dune:**
-1. Из того же запроса → New visualization → **Area Chart**
-2. X-axis: `week`
-3. Y-axis: `volume_usd`
-4. Group by: `project`
-5. Stacking: **Percent (100%)**
-6. Назначь те же цвета
-7. Title: `Market Share Drift: Who's Gaining Ground?`
-8. Y-axis label: `Share (%)`
+| Parameter | Value |
+|-----------|-------|
+| Chart type | 100% Stacked Area |
+| X-axis | `week` (date) |
+| Y-axis | `volume_usd` |
+| Group by | `project` |
+| Normalize | 100% |
+| Colors | Same as Viz 1 |
+| Height | 300px |
 
 ---
 
 ## QUERY C.3: MARKET SHARE — WHO CONTROLS THE ECOSYSTEM?
 
-### Что он делает
+### What It Does
 
-Pie/donut chart с **кумулятивной долей** каждого проекта от общего объёма рынка. В отличие от weekly chart, показывает итоговую картину «кто в сумме забрал больше всех».
+Cumulative market share donut chart — each project's slice of total 2026 YTD volume.
 
-### Описание для дашборда
+### Dashboard Description
 
-> **Dashboard description:** The grand total: which project has captured the most capital since January 2026? This pie chart slices the entire market by cumulative volume. A project owning 50%+ of this pie is the de facto market leader — and every other project is fighting for the remaining half.
+> **Title:** `Cards Market — Market Dominance (V2)`
+> **Viz Title:** `Market Dominance: Who Controls the Ecosystem?`
+> **Description:** Each project's share of total gacha/cards market volume in 2026. The bigger the slice, the bigger the player. Hover for exact USDC amounts. Note: Courtyard data is provisional (see methodology).
 
-### Название при сохранении
+### SQL
 
-`Cards Market - Market Dominance Map (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/02_market_share_total.sql`
+**File:** `queries/cards-dashboard/02_market_share_total.sql`
 
 ```sql
--- Q2: Market Share — Total Volume by Project
--- Pie chart: each project's share of total gacha/cards market
--- Color by chain grouping (Base=blue, Polygon=purple, Solana=green)
+-- Q2: Market Share — Total Volume by Project (V2 — 5 projects)
+-- Donut pie chart showing each project's share of the gacha market
+-- Engine: Medium (Solana queries)
 
 WITH beezie AS (
-    SELECT
-        'Beezie'  AS project,
-        'Base'    AS chain,
+    SELECT 'Beezie' AS project, 'Base' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM nft.trades
     WHERE blockchain = 'base'
@@ -654,9 +757,7 @@ WITH beezie AS (
 ),
 
 courtyard AS (
-    SELECT
-        'Courtyard'  AS project,
-        'Polygon'    AS chain,
+    SELECT 'Courtyard' AS project, 'Polygon' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM nft.trades
     WHERE blockchain = 'polygon'
@@ -665,15 +766,21 @@ courtyard AS (
 ),
 
 collector_crypt AS (
-    SELECT
-        'Collector Crypt'  AS project,
-        'Solana'           AS chain,
+    SELECT 'Collector Crypt' AS project, 'Solana' AS chain,
         COALESCE(SUM(amount_usd), 0) AS total_volume_usd
     FROM tokens_solana.transfers
     WHERE block_date >= DATE '2026-01-01'
-      AND to_owner = 'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
       AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
           'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
           'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
@@ -683,111 +790,108 @@ collector_crypt AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
-          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
 ),
 
 upshot AS (
-    SELECT
-        'Upshot'  AS project,
-        'Base'    AS chain,
+    SELECT 'Upshot' AS project, 'Base' AS chain,
         COALESCE(SUM(CAST(value AS DOUBLE) / 1e6), 0) AS total_volume_usd
     FROM erc20_base.evt_Transfer
     WHERE contract_address = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
       AND "to" = 0x939dbbcf075de12d9d8df08ef727591ddebbc13b
       AND evt_block_time >= TIMESTAMP '2026-01-01'
+),
+
+phygitals AS (
+    SELECT 'Phygitals' AS project, 'Solana' AS chain,
+        COALESCE(SUM(amount_usd), 0) AS total_volume_usd
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND (
+          (to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e'
+           AND from_owner NOT IN ('62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+          OR
+          (to_owner = '4SabGkbLc9uxzrq4f1Es9tJPZfHVzP28kwSosR2sYJRt'
+           AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                                  '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'))
+      )
 )
 
 SELECT
     project,
     chain,
-    ROUND(total_volume_usd, 2)              AS total_volume_usd,
-    project || ' (' || chain || ')'         AS label
+    ROUND(total_volume_usd, 2) AS total_volume_usd,
+    project || ' (' || chain || ')' AS label
 FROM (
     SELECT * FROM beezie
     UNION ALL SELECT * FROM courtyard
     UNION ALL SELECT * FROM collector_crypt
     UNION ALL SELECT * FROM upshot
+    UNION ALL SELECT * FROM phygitals
 )
 ORDER BY total_volume_usd DESC
 ```
 
-### Как оформить: Pie Chart (РЯД C-6, правая часть — или отдельный ряд)
+### Visualization: Donut Pie
 
-**Визуализация C.3a — "Market Dominance: Who Controls the Ecosystem?" (Donut Pie, РЯД C-7, 12 колонок)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Pie Chart** (Donut) |
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Donut Pie |
 | Values | `total_volume_usd` |
-| Labels | `label` (e.g., "Beezie (Base)") |
-| Высота | 350px |
-| Заголовок | `Market Dominance: Who Controls the Ecosystem?` |
-| Описание | `Cumulative volume since Jan 2026. The label shows project name and home chain. A single slice >50% means one project dominates the entire market — that's either healthy leadership or dangerous concentration.` |
-
-**Цвета:**
-
-| Slice | Color | HEX |
-|-------|-------|-----|
-| Beezie (Base) | Electric Blue | `#3B82F6` |
-| Courtyard (Polygon) | Royal Purple | `#8B5CF6` |
-| Collector Crypt (Solana) | Emerald Green | `#10B981` |
-| Upshot (Base) | Sky Blue | `#60A5FA` |
-
-**Как создать в Dune:**
-1. Открой запрос → New visualization → **Pie Chart**
-2. Values: `total_volume_usd`
-3. Labels: `label`
-4. Donut: **Yes**
-5. Назначь цвета по таблице
-6. Title: `Market Dominance: Who Controls the Ecosystem?`
-7. Show percentages: **Yes**
+| Labels | `label` |
+| Colors | Beezie=#3B82F6, Courtyard=#8B5CF6, CC=#10B981, Upshot=#60A5FA, Phygitals=#34D399 |
+| Height | 350px |
+| Show % | Yes |
 
 ---
 
-## TEXT WIDGET C.S3: AFTERMARKET SECTION
+## TEXT WIDGET C.S3: THE AFTERMARKET
 
-**Ряд C-8:** Full width (12 колонок). Разделитель перед Secondary Market.
-
-**Текст (скопируй как есть):**
+**Row C-8:** Full width (12 columns).
 
 ```markdown
 ---
 
 ## The Aftermarket: Life After the Pack
 
-Primary sales tell you who's buying packs. Secondary sales tell you who's **staying**. When collectors trade cards among themselves — on OpenSea, MagicEden, or via the CARDS token on DEXes — it signals genuine demand beyond the initial gacha thrill.
+What happens after you open the pack? Some cards get traded on secondary marketplaces (OpenSea, MagicEden, native platforms). Others get redeemed for the physical card. The secondary market tells you how "alive" a project's ecosystem is — healthy trading means the cards have real perceived value beyond the initial gacha pull.
 
-**How to read this:** Beezie and Courtyard secondary = NFT peer-to-peer trades. Collector Crypt secondary = CARDS token DEX volume on Solana (each CARDS token is a proxy for card value). A project with high primary but low secondary has users who buy but don't trade — that could mean they're holding... or leaving.
+> For Collector Crypt, secondary trading happens through the $CARDS token on DEXes (Raydium, Orca). For EVM projects, it's NFT marketplace trades.
 ```
 
 ---
 
-## QUERY C.4: SECONDARY MARKET — THE AFTERMARKET
+## QUERY C.4: SECONDARY MARKET — LIFE AFTER THE PACK
 
-### Что он делает
+### Dashboard Description
 
-Отслеживает объём **вторичных продаж** — торговлю между пользователями после первичной покупки. Beezie и Courtyard — через `nft.trades` (OpenSea, MagicEden, Blur). Collector Crypt — через DEX-торговлю токеном CARDS на Solana.
+> **Title:** `Cards Market — Secondary Market Volume (V2)`
+> **Viz Title:** `The Aftermarket: Weekly Secondary Volume by Project`
+> **Description:** NFT secondary sales on marketplaces + CARDS token DEX trading. This measures how actively cards change hands after the initial purchase. Higher secondary volume = healthier ecosystem.
 
-### Описание для дашборда
+### SQL
 
-> **Dashboard description:** Secondary market health check. NFT trades (Beezie on Base, Courtyard on Polygon) and CARDS token DEX volume (Collector Crypt on Solana). High secondary volume = active collector community. Low secondary = either diamond hands or fading interest. Upshot excluded — its secondary market is not yet tokenized as tradable NFTs.
-
-### Название при сохранении
-
-`Cards Market - Aftermarket: Secondary Trading Volume (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/03_secondary_market_volume.sql`
+**File:** `queries/cards-dashboard/03_secondary_market_volume.sql`
 
 ```sql
--- Q3: Secondary Market Volume by Project
--- Tracks NFT secondary sales via nft.trades (OpenSea, MagicEden, Blur, etc.)
--- Collector Crypt secondary = CARDS token DEX volume (dex_solana.trades)
+-- Q3: Secondary Market Volume by Project (V2 — includes Phygitals royalties)
+-- NFT secondary via nft.trades; CC secondary via CARDS DEX; Phygitals via royalty proxy
+-- Engine: Small for EVM, Medium for Solana DEX
 
 WITH beezie_secondary AS (
     SELECT
@@ -834,10 +938,28 @@ collector_crypt_dex AS (
     GROUP BY 1
 ),
 
+phygitals_royalties AS (
+    SELECT
+        date_trunc('week', block_time)  AS week,
+        'Phygitals'                     AS project,
+        'Solana'                        AS chain,
+        COALESCE(SUM(amount_usd), 0)    AS volume_usd,
+        COUNT(*)                        AS trades,
+        approx_distinct(from_owner)     AS unique_buyers
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND to_owner = '2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5'
+      AND from_owner NOT IN ('42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+                             '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf')
+    GROUP BY 1
+),
+
 combined AS (
     SELECT * FROM beezie_secondary
     UNION ALL SELECT * FROM courtyard_secondary
     UNION ALL SELECT * FROM collector_crypt_dex
+    UNION ALL SELECT * FROM phygitals_royalties
 )
 
 SELECT
@@ -852,107 +974,58 @@ WHERE week < date_trunc('week', NOW())
 ORDER BY week, project
 ```
 
-### Как оформить: Stacked Bar + Table (РЯД C-9)
+### Visualization: Stacked Bar
 
-**Визуализация C.4a — "The Aftermarket: Weekly Secondary Trading Volume" (Stacked Bar, РЯД C-9, 8 колонок)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Stacked Bar Chart** |
-| X-axis | `week` (Date) |
-| Y-axis | `volume_usd` (USD) |
-| Group By | `project` |
-| Stacking | Normal (stacked) |
-| Высота | 350px |
-| Заголовок | `The Aftermarket: Weekly Secondary Volume` |
-| Описание | `Peer-to-peer card trades on NFT marketplaces (Beezie, Courtyard) and CARDS token DEX swaps (Collector Crypt). Upshot excluded — no secondary NFT market. Incomplete weeks excluded.` |
-
-**Цвета:** Те же (chain-grouping): Beezie `#3B82F6`, Courtyard `#8B5CF6`, CC `#10B981`
-
-**Как создать в Dune:**
-1. Открой запрос → New visualization → **Bar Chart**
-2. X-axis: `week`
-3. Y-axis: `volume_usd`
-4. Group by: `project`
-5. Stacking: **Stacked**
-6. Title: `The Aftermarket: Weekly Secondary Volume`
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Stacked Bar |
+| X-axis | `week` (date) |
+| Y-axis | `volume_usd` |
+| Group by | `project` |
+| Colors | Same chain-grouped palette |
+| Height | 350px |
 
 ---
 
-**Визуализация C.4b — "Aftermarket Activity Table" (Table, РЯД C-9, 4 колонки)**
+## TEXT WIDGET C.S4: INSIDE THE MACHINE
 
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Table** |
-| Заголовок | `Aftermarket Activity` |
-| Описание | `Detailed breakdown: trades, unique buyers, and volume per project per week` |
-
-| Колонка | Формат |
-|---------|--------|
-| `week` | Date (YYYY-MM-DD) |
-| `project` | String |
-| `chain` | String |
-| `volume_usd` | USD ($), 2 дес. |
-| `trades` | Number |
-| `unique_buyers` | Number |
-
-Сортировка: `week` DESC.
-
-**Как создать в Dune:**
-1. Из того же запроса → New visualization → **Table**
-2. Настрой форматы колонок
-3. Сортировка: `week` DESC
-
----
-
-## TEXT WIDGET C.S4: DEEP DIVE SECTION
-
-**Ряд C-10:** Full width (12 колонок). Разделитель перед Deep Dive.
-
-**Текст (скопируй как есть):**
+**Row C-10:** Full width (12 columns).
 
 ```markdown
 ---
 
-## Deep Dive: Inside the Cards and the Machine
+## Inside the Machine: What's Being Minted and Who's Playing
 
-Two questions that define the future of this market:
+Deep dive into the composition of the market. What types of cards are people actually buying? How does Collector Crypt's gacha rarity system distribute cards? And is the project making money or burning through reserves?
 
-**1. What are people actually collecting?** The card type distribution reveals whether this market is driven by nostalgia (Pokémon) or utility (Sports). Today, the split is stark — and it tells us where the growth ceiling is.
-
-**2. How does the gacha machine actually work?** Collector Crypt's rarity distribution is the heartbeat of their entire economy. Seven rarity tiers — from Low (most common) to One (literally unique) — each with dedicated on-chain wallets. The chart below shows how many cards flow from each rarity pool to players every week. When Legend and One distributions spike, something special is happening.
+> **Card Types** shows market preference (Pokémon dominates, but Sport is growing). **Gacha Plays** reveals player behavior by rarity tier. **Key Metrics** shows the financial health of Collector Crypt — the largest gacha project.
 ```
 
 ---
 
 ## QUERY C.5: CARD TYPES — WHAT'S IN THE PACK?
 
-### Что он делает
+### Dashboard Description
 
-Показывает распределение **типов карт** в экосистеме Collector Crypt. V1 использует данные из rarity pool wallets: Sport wallet = Sports карты, все остальные = Pokémon / TCG. V2 добавит кросс-проектный анализ через NFT metadata.
+> **Title:** `Cards Market — Card Types (Niche Interest)`
+> **Viz Title:** `What's in the Pack? Card Type Distribution`
+> **Description:** Cumulative card distributions by type across the gacha market. Based on Collector Crypt rarity pool data — Sport wallet = sport cards, all other pools = Pokémon/TCG. V2 will add Phygitals types (Baseball, Football, Basketball, One Piece, Yu-Gi-Oh!).
 
-### Описание для дашборда
+### SQL
 
-> **Dashboard description:** What's inside the packs? Collector Crypt's rarity pools reveal the split between Pokémon/TCG and Sport cards. Currently, the market is overwhelmingly Pokémon — but the Sport wallet is growing. When Sport share rises, it signals diversification beyond the nostalgia-driven Pokémon core.
-
-### Название при сохранении
-
-`Cards Market - What's in the Pack? Card Types (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/04_niche_card_types.sql`
+**File:** `queries/cards-dashboard/04_niche_card_types.sql`
 
 ```sql
--- Q4: Card Types Distribution (Niche Interest)
--- V1: Based on Collector Crypt rarity pool distributions
+-- Q4: Card Types Distribution (V2 — Niche Interest)
+-- Based on Collector Crypt rarity pool distributions
 -- Sport wallet = Sport cards; all other rarity wallets = Pokemon / TCG
--- V2: Add cross-project type analysis via NFT metadata
+-- Engine: Medium (Solana transfers)
 
 WITH cc_distributions AS (
     SELECT
         CASE from_owner
             WHEN 'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD'  THEN 'Sport'
+            WHEN 'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8'  THEN 'Sport'
             ELSE 'Pokemon / TCG'
         END AS card_type,
         COUNT(*) AS cards_distributed
@@ -968,8 +1041,10 @@ WITH cc_distributions AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
-          'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD'
+          'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8'
       )
       AND to_owner NOT IN (
           'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
@@ -981,11 +1056,15 @@ WITH cc_distributions AS (
           'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
           'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
           'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
           'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
           'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
           'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
           'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
-          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
       )
     GROUP BY 1
 )
@@ -1001,60 +1080,39 @@ FROM cc_distributions
 ORDER BY cards_distributed DESC
 ```
 
-### Как оформить: Pie Chart (РЯД C-11, левая часть)
+### Visualization: Donut Pie
 
-**Визуализация C.5a — "What's in the Pack? Card Type Distribution" (Donut Pie, РЯД C-11, 6 колонок)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Pie Chart** (Donut) |
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Donut Pie |
 | Values | `cards_distributed` |
 | Labels | `card_type` |
-| Высота | 300px |
-| Заголовок | `What's in the Pack? Card Type Distribution` |
-| Описание | `Cards distributed from Collector Crypt rarity pools, classified by type. Sport wallet → Sport cards. All other rarity pools → Pokémon/TCG. V2 will add cross-project metadata analysis.` |
-
-**Цвета:**
-
-| Slice | Color | HEX | Why |
-|-------|-------|-----|-----|
-| Pokemon / TCG | Gold/Amber | `#F59E0B` | Pokémon's brand color association |
-| Sport | Cyan | `#06B6D4` | Sports broadcasting feel |
-
-**Как создать в Dune:**
-1. Открой запрос → New visualization → **Pie Chart**
-2. Values: `cards_distributed`
-3. Labels: `card_type`
-4. Donut: **Yes**
-5. Pokemon / TCG: `#F59E0B`, Sport: `#06B6D4`
-6. Title: `What's in the Pack? Card Type Distribution`
-7. Show percentages: **Yes**
+| Colors | Pokemon=#F59E0B (amber), Sport=#10B981 (green) |
+| Height | 300px |
+| Show % | Yes |
 
 ---
 
-## QUERY C.6: COLLECTOR CRYPT GACHA — INSIDE THE MACHINE
+## QUERY C.6: COLLECTOR CRYPT GACHA — RARITY DISTRIBUTION
 
-### Что он делает
+### Dashboard Description
 
-Самый детальный график на дашборде. Показывает **еженедельное распределение карт по тирам редкости** из gacha-контракта Collector Crypt на Solana. 7 тиров: Low → Mid → High → Epic → Legend → One → Sport. Каждый тир имеет выделенные on-chain кошельки.
+> **Title:** `CC Gacha — Plays by Rarity (V2)`
+> **Viz 1 Title:** `Inside the Machine: Gacha Rarity Distribution`
+> **Viz 1 Description:** Weekly card distributions from each rarity pool. Low is the most common, Legend is the rarest. This is the gacha engine — where randomness meets value.
+> **Viz 2 Title:** `Gacha Players: Weekly Unique Participants by Rarity`
+> **Viz 2 Description:** How many unique wallets are pulling from each rarity tier? Declining player counts at high rarities = healthy distribution (few can afford Legend pulls).
+> **⚠️ Engine:** Medium required (small engine times out on `tokens_solana.transfers` scan)
 
-### Описание для дашборда
+### SQL
 
-> **Dashboard description:** Peer inside Collector Crypt's gacha engine. Every card distributed from a rarity pool to a player is a data point. Seven tiers of rarity — from **Low** (most common, cheapest floor) to **One** (literally a single unique card) — each tracked from dedicated on-chain wallets. When Legend and One distributions spike, it means high-value cards are entering circulation. Unique players show community breadth. Adapted from Giedi's public query. Recommended: medium engine (Solana transfers are heavy).
-
-### Название при сохранении
-
-`Cards Market - Inside the Machine: CC Gacha Rarity Distribution (V1)`
-
-### SQL-код
-
-**Файл:** `queries/cards-dashboard/06_collector_crypt_gacha_plays.sql`
+**File:** `queries/cards-dashboard/06_collector_crypt_gacha_plays.sql`
 
 ```sql
 -- Q6: Collector Crypt — Gacha Plays by Rarity (weekly)
--- Adapted from Giedi's public query (cont_2.md context)
--- Shows card distributions from rarity pools to players
--- Recommended: medium engine (Solana token transfers are heavy)
+-- Adapted from Giedi's public query
+-- IMPORTANT: Requires MEDIUM engine (small engine timeout confirmed)
+-- Engine: Medium
 
 WITH rarity_wallets AS (
     SELECT * FROM (
@@ -1068,8 +1126,10 @@ WITH rarity_wallets AS (
             ('EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',  'Epic'),
             ('epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',  'Epic'),
             ('LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',  'Legend'),
+            ('LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',  'Legend'),
             ('onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',   'One'),
-            ('SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',  'Sport')
+            ('SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',  'Sport'),
+            ('SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',  'Sport')
     ) AS t(wallet, rarity)
 ),
 
@@ -1085,11 +1145,15 @@ excluded_recipients AS (
             ('EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF'),
             ('epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn'),
             ('LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf'),
+            ('LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj'),
             ('onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs'),
             ('SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD'),
+            ('SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8'),
             ('DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd'),
             ('cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi'),
-            ('GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3')
+            ('GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3'),
+            ('GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z'),
+            ('96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s')
     ) AS t(address)
 )
 
@@ -1108,382 +1172,346 @@ GROUP BY 1, 2
 ORDER BY week DESC, plays DESC
 ```
 
-### Как оформить: Stacked Bar (РЯД C-11, правая часть + РЯД C-12)
+### Visualization 1: Stacked Bar
 
-**Визуализация C.6a — "Inside the Machine: Gacha Rarity Distribution" (Stacked Bar, РЯД C-11, 6 колонок)**
-
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Stacked Bar Chart** |
-| X-axis | `week` (Date) |
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Stacked Bar |
+| X-axis | `week` |
 | Y-axis | `cards_distributed` |
-| Group By | `rarity` |
-| Stacking | Normal (stacked) |
-| Высота | 350px |
-| Заголовок | `Inside the Machine: Gacha Rarity Distribution` |
-| Описание | `Weekly cards distributed from each rarity tier. Low = most common. One = literally unique. The taller the bar, the more active the gacha economy. Watch for Legend/One spikes — those are rare drops entering the market.` |
+| Group by | `rarity` |
+| Colors | Low=#94A3B8, Mid=#60A5FA, High=#3B82F6, Epic=#8B5CF6, Legend=#F59E0B, One=#EF4444, Sport=#10B981 |
+| Height | 350px |
 
-**Цвета по тирам редкости (от холодных к горячим):**
+### Visualization 2: Line Chart
 
-| Rarity | Color | HEX | Мотивация |
-|--------|-------|-----|-----------|
-| Low | Slate Gray | `#94A3B8` | Common, unexciting |
-| Mid | Cool Blue | `#60A5FA` | Stepping up |
-| High | Teal | `#14B8A6` | Getting interesting |
-| Epic | Purple | `#A78BFA` | Rare and desirable |
-| Legend | Gold | `#F59E0B` | Legendary — gold standard |
-| One | Hot Red | `#EF4444` | Unique — maximum rarity, maximum heat |
-| Sport | Cyan | `#06B6D4` | Distinct category |
-
-**Как создать в Dune:**
-1. Открой запрос → New visualization → **Bar Chart**
-2. X-axis: `week`
-3. Y-axis: `cards_distributed`
-4. Group by: `rarity`
-5. Stacking: **Stacked**
-6. Назначь цвета по таблице выше
-7. Title: `Inside the Machine: Gacha Rarity Distribution`
-8. Sort legend order: Low, Mid, High, Epic, Legend, One, Sport (от common к rare)
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Line |
+| X-axis | `week` |
+| Y-axis | `unique_players` |
+| Group by | `rarity` |
+| Colors | Same as Viz 1 |
+| Height | 250px |
 
 ---
 
-**Визуализация C.6b — "Gacha Players: Weekly Unique Participants" (Line Chart, РЯД C-12, 12 колонок)**
+## QUERY C.7: COLLECTOR CRYPT KEY METRICS — THE P&L
 
-| Параметр | Значение |
-|----------|----------|
-| Тип | **Line Chart** |
-| X-axis | `week` (Date) |
-| Y-axis | `unique_players` |
-| Group By | `rarity` |
-| Высота | 250px |
-| Заголовок | `Gacha Players: Weekly Unique Participants by Rarity` |
-| Описание | `How many distinct wallets receive cards from each rarity tier each week? Rising lines = growing community. Converging lines = players are spreading across tiers (healthy). Only Low rising = new players entering at the bottom (growth phase).` |
+### What It Does
 
-**Цвета:** Те же, что и C.6a.
+Weekly P&L for Collector Crypt's gacha economy. Tracks USDC inflows (gacha spend), outflows (buybacks), fee wallet receipts, and net revenue. Based on DefiLlama adapter methodology.
 
-**Как создать в Dune:**
-1. Из того же запроса → New visualization → **Line Chart**
-2. X-axis: `week`
-3. Y-axis: `unique_players`
-4. Group by: `rarity`
-5. Title: `Gacha Players: Weekly Unique Participants by Rarity`
+### Dashboard Description
+
+> **Title:** `CC Key Metrics — Weekly P&L (V2)`
+> **Viz Title:** `Collector Crypt P&L: Revenue vs Buybacks`
+> **Description:** Is Collector Crypt making money? Weekly USDC flows through the gacha system — what comes in (gacha spend), what goes out (buybacks to players), and what stays (net revenue + fees). When net_revenue is positive, the project is profitable.
+
+### SQL
+
+**File:** `queries/cards-dashboard/07_cc_key_metrics_pnl.sql`
+
+```sql
+-- Q7: Collector Crypt — Key Metrics P&L (weekly)
+-- USDC flow analysis: gacha spend, buybacks, fees, net revenue
+-- Based on DefiLlama adapter methodology (fees/collector-crypt/index.ts)
+-- Engine: Medium
+
+WITH gacha_weekly AS (
+    SELECT
+        date_trunc('week', block_time) AS week,
+        SUM(amount_usd) AS gacha_spend
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND to_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND from_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
+          'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
+          'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
+          'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
+          'miDtj3vgdxVykHzRyFwyG8MXpvK8eQqamSLVdBr7WPt',
+          'HighJBfnAaqH9cKkeMErQFJZ4ATxQJwxqFupX6zaKTns',
+          'HiGHqwYddP5N2waqUmXPdaASpMpUEvfqPr2fSawctEb',
+          'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
+          'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
+          'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
+          'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
+          'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
+          'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
+    GROUP BY 1
+),
+
+fees_weekly AS (
+    SELECT
+        date_trunc('week', block_time) AS week,
+        SUM(amount_usd) AS fees
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND to_owner = 'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+    GROUP BY 1
+),
+
+buyback_weekly AS (
+    SELECT
+        date_trunc('week', block_time) AS week,
+        SUM(amount_usd) AS buyback
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND from_owner IN (
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z'
+      )
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND to_owner NOT IN (
+          'BAxTk97HsaJqbnbFmTiQTaL4KSRvJ8Y65ArZCsP6vA5M',
+          '21KhtC7y2JGYvwc8dcGqTdbrudbM8fgMPJsVwxRQqdY8',
+          'DFEstpYN3fsz93AC9v2ujzPPngPgodqH2xxopuyfSsAE',
+          'HW2HRqN1pXQGH9GfP9xet4XwqtLqFyYGDNRKjUAVgh9u',
+          'Low6UekJP3QrFVMfNRTL8CPK2SiGFhvp57sgF2pkmVu',
+          'Lowq9dkpY43VpjfYeRjtKfGA6JtB7HaMmwQgXkjHLvN',
+          'Mid9NeCpPNxP59fAdsLgMLy7BYexxXFw52ZP58Jrney',
+          'miDtj3vgdxVykHzRyFwyG8MXpvK8eQqamSLVdBr7WPt',
+          'HighJBfnAaqH9cKkeMErQFJZ4ATxQJwxqFupX6zaKTns',
+          'HiGHqwYddP5N2waqUmXPdaASpMpUEvfqPr2fSawctEb',
+          'EpicWWZspT1trKndbDDr29ULViN56rN5vofWSKZp8ePF',
+          'epiC3zkqa1RfcPMMM1Kc8m3GZGDwF2RmjbfA3g1BBjn',
+          'LGNDXqcm6U57QQ6Ad7icZ6oizkAVKRWrw97KwZy5nVf',
+          'LGNDfXQFMiRMz3qqTNAREmRFQutMvazqqRrzn5i98uj',
+          'onePMfirJs2Rx3eixoPnjY6NHiaC74pkQ2k313K2Lxs',
+          'SportGmqffp9zC3VZV7Wwz6s2nCkEB5Q3nVwKGU4esD',
+          'SPrT7eFrCM9UJ4j7Xf9iktKCoBwJjfykFbiNbRsKQm8',
+          'Cc4pHGnoaRWL1WnHsV517T3YvQn5gLDBMiuVXkF9rZhK',
+          '8373hLiAEXxaJ3oV7SRzx4KHwurEg9rEG98tUPj1sdtX',
+          'DQPERZ9e86pNJ4mhUnCEP8V75yxZofsipoVrRWT5Wdxd',
+          'cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi',
+          'GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3',
+          'GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z',
+          '96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s'
+      )
+    GROUP BY 1
+)
+
+SELECT
+    COALESCE(g.week, f.week, b.week)                                  AS week,
+    COALESCE(ROUND(g.gacha_spend, 2), 0)                              AS gacha_spend,
+    COALESCE(ROUND(b.buyback, 2), 0)                                  AS buyback,
+    COALESCE(ROUND(f.fees, 2), 0)                                     AS fees,
+    COALESCE(ROUND(g.gacha_spend, 2), 0)
+      + COALESCE(ROUND(f.fees, 2), 0)
+      - COALESCE(ROUND(b.buyback, 2), 0)                              AS net_revenue
+FROM gacha_weekly g
+FULL OUTER JOIN fees_weekly f ON g.week = f.week
+FULL OUTER JOIN buyback_weekly b ON g.week = b.week
+WHERE COALESCE(g.week, f.week, b.week) < date_trunc('week', NOW())
+ORDER BY week DESC
+```
+
+### Visualization: Multi-series Bar + Line
+
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Mixed (Bar + Line) |
+| X-axis | `week` |
+| Bar series | `gacha_spend` (green), `buyback` (red) |
+| Line series | `net_revenue` (blue, dashed) |
+| Height | 350px |
 
 ---
 
 ## TEXT WIDGET C.F: METHODOLOGY & SOURCES
 
-**Ряд C-13:** Full width (12 колонок). Последний виджет.
-
-**Текст (скопируй как есть):**
+**Row C-14:** Full width (12 columns). Last widget.
 
 ```markdown
 ---
 
-### Methodology, Data Sources & Definitions
+## Methodology & Sources
 
-#### What this dashboard tracks
+### Data Sources
+- **Beezie (Base):** `nft.trades` — NFT contract `0xbb5ec6...16f`
+- **Courtyard (Polygon):** `nft.trades` — NFT contract `0x251BE3...cAD` ⚠️ Provisional: only captures trades via indexed marketplaces. Courtyard's own marketplace pending Spellbook integration ([PR #8704](https://github.com/duneanalytics/spellbook/pull/8704))
+- **Collector Crypt (Solana):** `tokens_solana.transfers` — USDC to 3 gacha wallets, internal addresses excluded per [DefiLlama methodology](https://github.com/DefiLlama/dimension-adapters/blob/master/fees/collector-crypt/index.ts)
+- **Phygitals (Solana):** `tokens_solana.transfers` — USDC to gacha + lucky draw wallets, per [DefiLlama methodology](https://github.com/DefiLlama/dimension-adapters/blob/master/fees/phygitals/index.ts)
+- **Upshot (Base):** `erc20_base.evt_Transfer` — USDC deposits to `0x939dbb...13b`
 
-This is an **aggregate market view** — the first dashboard to combine all major tokenized card projects across multiple blockchains into a single cross-chain comparison. Each project is tracked through its native on-chain data source (see table below).
+### Definitions
+- **Volume** = Total USDC-equivalent inflows from users to project contracts (pack purchases, claw plays, deposits)
+- **Market Share** = Project volume / total market volume × 100%
+- **Secondary Volume** = NFT trades on marketplaces (OpenSea, MagicEden) + CARDS token DEX trading
+- **Buyback** = USDC returned from gacha wallets to user wallets (instant liquidity mechanism)
+- **WoW Growth** = (This week volume − Last week volume) / Last week volume × 100%
 
-| Project | Data Source | What's Measured | Chain |
-|---------|-----------|----------------|-------|
-| **Beezie** | `nft.trades` (Dune Spellbook) | NFT trade volume in USD | Base |
-| **Courtyard** | `nft.trades` (Dune Spellbook) | NFT trade volume in USD | Polygon |
-| **Collector Crypt** | `tokens_solana.transfers` | USDC inflows to gacha contract | Solana |
-| **Upshot** | `erc20_base.evt_Transfer` | USDC deposits to contract | Base |
-| **Collector Crypt (secondary)** | `dex_solana.trades` | CARDS token DEX volume | Solana |
+### Engine Requirements
+- Solana queries require **medium engine** (small engine timeout on `tokens_solana.transfers`)
+- EVM queries run on small engine
+- Recommended refresh: every 6–12 hours
 
-#### Key definitions
+### Known Data Quality Issues
+- ⚠️ **Courtyard:** Numbers likely undercount true marketplace volume. See [Courtyard Data Quality Note](#courtyard--data-quality-note)
+- **Phygitals:** Card type breakdown not available on-chain in V1 (only total volume)
+- **Cross-chain users:** Same person on multiple chains counted separately per chain
 
-- **Primary volume** — Capital entering the project for the first time: pack purchases, claw machine plays, USDC deposits
-- **Secondary volume** — Peer-to-peer trading after initial purchase: NFT marketplace trades, CARDS token DEX swaps
-- **Market share** — A project's cumulative primary volume as a percentage of total market volume
-- **WoW (Week-over-Week)** — Percentage change in weekly NFT market volume (Base + Polygon) compared to the prior week
-- **Gacha** — Japanese term for randomized prize mechanisms (like capsule toy machines). In crypto: pay USDC → receive a random NFT card of varying rarity
-- **Rarity tiers** — Collector Crypt uses 7 tiers: Low, Mid, High, Epic, Legend, One, Sport. Each tier has dedicated on-chain wallets that distribute cards to players
-
-#### Known limitations
-
-| Limitation | Impact |
-|------------|--------|
-| **Beezie primary vs secondary not separated** | `nft.trades` captures all trades — we cannot distinguish first sale from resale without marketplace-specific filtering. Shown as one combined number |
-| **Collector Crypt USDC only** | Gacha inflows tracked via USDC transfers to the gacha contract. If CC accepts other tokens in the future, they won't be captured until added |
-| **Upshot: deposits only** | We track USDC flowing INTO the Upshot contract. Withdrawals and P&L are not yet tracked (V2) |
-| **Phygitals: V2** | Compressed NFTs (Metaplex Bubblegum) require wallet identification before tracking can begin |
-| **Cross-chain USD normalization** | All values shown in USD. NFT trades use Dune Spellbook's `amount_usd` (marketplace-reported). Solana USDC = 1:1 by definition |
-| **WoW growth covers NFT markets only** | Solana gacha and Upshot deposits are not included in the WoW calculation due to different data structures |
-
-#### Date range
-
-All queries filter from **January 1, 2026** onward to minimize Dune credit consumption while capturing the full active period of all tracked projects.
-
-#### Gacha contract internal addresses
-
-Collector Crypt's gacha architecture uses dedicated wallets for each rarity tier. Transfers between these wallets, the fee wallet, and the gacha contract itself are excluded from all calculations to avoid double-counting internal fund movements. See the "Collector Crypt — Gacha Architecture" section above for the full address list.
-
-> Built by [AX1 Research](https://twitter.com/AX1ecosystem) | Source code: [GitHub](https://github.com/BOSSincrypto/base-agentic-ecosystem) | Questions? [@AX1ecosystem](https://twitter.com/AX1ecosystem)
+> Built by [AX1 Research](https://twitter.com/AX1ecosystem) | [GitHub](https://github.com/BOSSincrypto/base-agentic-ecosystem) | Dashboard V2 — May 2026
 ```
 
 ---
 
-## ОПИСАНИЯ ИНДИКАТОРОВ
+## VISUALIZATION SPECS
 
-Краткие описания для каждого индикатора — использовать в **Description** поле виджетов на Dune.
+### Color Palette (chain-grouped)
 
-### Query C.1: KPI Counters — Market at a Glance
-> **Dashboard description:** The heartbeat of the tokenized cards market in four numbers — total capital inflows, active participants, who's winning, and whether the market is accelerating or cooling down. Cross-chain: Base + Polygon + Solana.
+| Project | Chain | Primary Color | HEX |
+|---------|-------|---------------|-----|
+| Beezie | Base | Blue | `#3B82F6` |
+| Upshot | Base | Light Blue | `#60A5FA` |
+| Courtyard | Polygon | Purple | `#8B5CF6` |
+| Collector Crypt | Solana | Green | `#10B981` |
+| Phygitals | Solana | Light Green | `#34D399` |
+| (BNB future) | BNB | Amber | `#F59E0B` |
 
-### Query C.2: Weekly Volume — The Capital Race
-> **Dashboard description:** The weekly spending race across all four projects. Each bar represents one week of capital inflows in USD. Watch which colors grow and shrink — that's market share shifting in real time. Beezie and Courtyard trade via NFT marketplaces, Collector Crypt via gacha packs (Solana USDC), Upshot via USDC deposits.
+### Rarity Colors (CC Gacha)
 
-### Query C.3: Market Share — Market Dominance Map
-> **Dashboard description:** The grand total: which project has captured the most capital since January 2026? This pie chart slices the entire market by cumulative volume. A project owning 50%+ of this pie is the de facto market leader.
+| Rarity | Color | HEX |
+|--------|-------|-----|
+| Low | Slate | `#94A3B8` |
+| Mid | Light Blue | `#60A5FA` |
+| High | Blue | `#3B82F6` |
+| Epic | Purple | `#8B5CF6` |
+| Legend | Amber/Gold | `#F59E0B` |
+| One | Red | `#EF4444` |
+| Sport | Green | `#10B981` |
 
-### Query C.4: Secondary Market — The Aftermarket
-> **Dashboard description:** Secondary market health check. NFT trades (Beezie on Base, Courtyard on Polygon) and CARDS token DEX volume (Collector Crypt on Solana). High secondary volume = active collector community. Low secondary = either diamond hands or fading interest.
+### P&L Colors
 
-### Query C.5: Card Types — What's in the Pack?
-> **Dashboard description:** What's inside the packs? Collector Crypt's rarity pools reveal the split between Pokémon/TCG and Sport cards. When Sport share rises, it signals diversification beyond the nostalgia-driven Pokémon core.
-
-### Query C.6: Gacha Rarity — Inside the Machine
-> **Dashboard description:** Peer inside Collector Crypt's gacha engine. Seven tiers of rarity — from Low (most common) to One (literally unique). When Legend and One distributions spike, high-value cards are entering circulation.
-
----
-
-## ВИЗУАЛИЗАЦИИ И ОФОРМЛЕНИЕ
-
-### Все визуализации дашборда
-
-| # | ID | Тип | Источник | Заголовок | Ряд |
-|---|------|-----|----------|-----------|-----|
-| 1 | C.H | Text Widget | — | Cards Market: Where Physical Trading Cards Meet Blockchain | C-1 |
-| 2 | C.S1 | Text Widget | — | Market Pulse: The Vital Signs | C-2 |
-| 3 | C.1a | Counter | Query C.1 | Total Market Volume | C-3 |
-| 4 | C.1b | Counter | Query C.1 | Unique Collectors | C-3 |
-| 5 | C.1c | Counter | Query C.1 | Market Leader | C-3 |
-| 6 | C.1d | Counter | Query C.1 | Weekly Momentum | C-3 |
-| 7 | C.S2 | Text Widget | — | Capital Flow: Where the Money Goes | C-4 |
-| 8 | C.2a | Stacked Bar | Query C.2 | The Capital Race: Weekly Inflows by Project | C-5 |
-| 9 | C.2b | 100% Area | Query C.2 | Market Share Drift: Who's Gaining Ground? | C-6 |
-| 10 | C.3a | Donut Pie | Query C.3 | Market Dominance: Who Controls the Ecosystem? | C-7 |
-| 11 | C.S3 | Text Widget | — | The Aftermarket: Life After the Pack | C-8 |
-| 12 | C.4a | Stacked Bar | Query C.4 | The Aftermarket: Weekly Secondary Volume | C-9 |
-| 13 | C.4b | Table | Query C.4 | Aftermarket Activity | C-9 |
-| 14 | C.S4 | Text Widget | — | Deep Dive: Inside the Cards and the Machine | C-10 |
-| 15 | C.5a | Donut Pie | Query C.5 | What's in the Pack? Card Type Distribution | C-11 |
-| 16 | C.6a | Stacked Bar | Query C.6 | Inside the Machine: Gacha Rarity Distribution | C-11 |
-| 17 | C.6b | Line Chart | Query C.6 | Gacha Players: Weekly Unique Participants by Rarity | C-12 |
-| 18 | C.F | Text Widget | — | Methodology, Data Sources & Definitions | C-13 |
-
-**Итого: 6 queries · 6 text widgets · 4 counters · 3 stacked bars · 1 area · 2 pies · 1 line · 1 table = 18 виджетов в 13 рядах**
+| Metric | Color | HEX |
+|--------|-------|-----|
+| Gacha Spend (inflow) | Green | `#10B981` |
+| Buyback (outflow) | Red | `#EF4444` |
+| Fees | Amber | `#F59E0B` |
+| Net Revenue | Blue | `#3B82F6` |
 
 ---
 
-## КАРТА LAYOUT
+## LAYOUT MAP
 
 ```
-=====================================================================
-  CARDS MARKET: WHERE PHYSICAL TRADING CARDS MEET BLOCKCHAIN
-=====================================================================
-
-РЯД C-1:  [TEXT WIDGET C.H — 12 колонок]
-          "Cards Market: Where Physical Trading Cards Meet Blockchain"
-          Полное описание рынка, как работает gacha, 4 проекта, 3 чейна
-
----------------------------------------------------------------------
-
-РЯД C-2:  [TEXT WIDGET C.S1 — 12 колонок]
-          "Market Pulse: The Vital Signs"
-
-РЯД C-3:  [4 КАУНТЕРА из Query C.1]
-          | Total Market Volume | Unique Collectors | Market Leader | Weekly Momentum |
-          |   3 кол, Amber     |   3 кол, Purple   |  3 кол, Green |   3 кол, Green  |
-
----------------------------------------------------------------------
-
-РЯД C-4:  [TEXT WIDGET C.S2 — 12 колонок]
-          "Capital Flow: Where the Money Goes"
-
-РЯД C-5:  [CHART C.2a — 12 колонок]
-          "The Capital Race: Weekly Inflows by Project"
-          Stacked Bar (X: week, Y: volume_usd, Group: project)
-
-РЯД C-6:  [CHART C.2b — 12 колонок]
-          "Market Share Drift: Who's Gaining Ground?"
-          100% Stacked Area (normalized market share %)
-
-РЯД C-7:  [CHART C.3a — 12 колонок]
-          "Market Dominance: Who Controls the Ecosystem?"
-          Donut Pie (project shares of total volume)
-
----------------------------------------------------------------------
-
-РЯД C-8:  [TEXT WIDGET C.S3 — 12 колонок]
-          "The Aftermarket: Life After the Pack"
-
-РЯД C-9:  [CHART C.4a — 8 колонок]         [TABLE C.4b — 4 колонки]
-          "The Aftermarket: Weekly           "Aftermarket Activity"
-           Secondary Volume"                  (detailed table)
-          Stacked Bar
-
----------------------------------------------------------------------
-
-РЯД C-10: [TEXT WIDGET C.S4 — 12 колонок]
-          "Deep Dive: Inside the Cards and the Machine"
-
-РЯД C-11: [CHART C.5a — 6 колонок]         [CHART C.6a — 6 колонок]
-          "What's in the Pack?               "Inside the Machine: Gacha
-           Card Type Distribution"            Rarity Distribution"
-          Donut Pie                           Stacked Bar
-
-РЯД C-12: [CHART C.6b — 12 колонок]
-          "Gacha Players: Weekly Unique Participants by Rarity"
-          Line Chart
-
----------------------------------------------------------------------
-
-РЯД C-13: [TEXT WIDGET C.F — 12 колонок]
-          "Methodology, Data Sources & Definitions"
+Row C-1:  [======== C.H: Dashboard Header (12 col) ========]
+Row C-2:  [======== C.S1: Market Pulse text (12 col) =======]
+Row C-3:  [KPI-1 (3)][KPI-2 (2)][KPI-3 (3)][KPI-4 (2)][KPI-5 (2)]
+Row C-4:  [======== C.S2: Capital Race text (12 col) =======]
+Row C-5:  [====== Q2 Viz1: Weekly Volume Stacked Bar (12 col) ======]
+Row C-6:  [== Q2 Viz2: Market Share % Area (8 col) ==][Q3: Donut Pie (4 col)]
+Row C-7:  [======== C.S3: Aftermarket text (12 col) ========]
+Row C-8:  [====== Q4: Secondary Market Stacked Bar (12 col) ======]
+Row C-9:  [======== C.S4: Deep Dive text (12 col) =========]
+Row C-10: [== Q5: Card Types Donut (4 col) ==][== Q6 Viz1: Gacha Rarity Bar (8 col) ==]
+Row C-11: [====== Q6 Viz2: Gacha Players Line (12 col) ======]
+Row C-12: [====== Q7: CC P&L Bar+Line (12 col) ======]
+Row C-13: [======== C.F: Methodology & Sources (12 col) ====]
 ```
 
----
-
-## ЦВЕТОВАЯ ПАЛИТРА
-
-### Тема: Chain-Grouping
-
-Каждый проект окрашен в семейство цветов своей домашней цепочки. Это создаёт интуитивную визуальную связь: когда ты видишь, какой цвет доминирует на графике — ты сразу видишь, какой чейн доминирует.
-
-### Цвета проектов (основные)
-
-| Project | Chain | Color Name | HEX | Мотивация |
-|---------|-------|------------|-----|-----------|
-| **Beezie** | Base | Electric Blue | `#3B82F6` | Base brand — primary blue |
-| **Upshot** | Base | Sky Blue | `#60A5FA` | Base family — lighter shade for distinction |
-| **Courtyard** | Polygon | Royal Purple | `#8B5CF6` | Polygon brand association |
-| **Collector Crypt** | Solana | Emerald Green | `#10B981` | Solana green family |
-
-### Цвета тиров редкости (Gacha)
-
-| Rarity | Color Name | HEX | Мотивация |
-|--------|------------|-----|-----------|
-| Low | Slate Gray | `#94A3B8` | Common, subdued |
-| Mid | Cool Blue | `#60A5FA` | Stepping up in value |
-| High | Teal | `#14B8A6` | Getting interesting |
-| Epic | Soft Purple | `#A78BFA` | Rare and desirable |
-| Legend | Gold | `#F59E0B` | Legendary — gold standard |
-| One | Hot Red | `#EF4444` | Maximum rarity, maximum heat |
-| Sport | Cyan | `#06B6D4` | Distinct sport category |
-
-### Цвета типов карт
-
-| Type | Color | HEX |
-|------|-------|-----|
-| Pokemon / TCG | Amber/Gold | `#F59E0B` |
-| Sport | Cyan | `#06B6D4` |
-
-### Утилитарные цвета
-
-| Element | Color | HEX |
-|---------|-------|-----|
-| Volume / Money (counters) | Amber | `#F59E0B` |
-| Growth / Positive | Green | `#10B981` |
-| Decline / Negative | Red | `#EF4444` |
-| Users / Community | Purple | `#8B5CF6` |
-| Neutral / Muted | Slate | `#64748B` |
+**Total: 13 rows · 7 queries · 6 text widgets · 5 counters · 7 charts = 25 widgets**
 
 ---
 
-## ПОРЯДОК ДЕЙСТВИЙ НА DUNE — ЧЕКЛИСТ
+## IMPLEMENTATION CHECKLIST
 
-### Фаза 1: Создание дашборда
+### Phase 1: Create Queries on Dune (Engine: Medium)
 
-- [ ] **1.1** Зайди на https://dune.com → New → Dashboard
-- [ ] **1.2** Назови: `Cards Market: Where Physical Trading Cards Meet Blockchain`
-- [ ] **1.3** Поставь **Public**
+- [ ] Create Q1 (KPI Counters) → save as `Cards Market - KPI Counters (V2)`
+- [ ] Create Q2 (Weekly Volume) → save as `Cards Market - Weekly Volume by Project (V2)`
+- [ ] Create Q3 (Market Share) → save as `Cards Market - Market Dominance (V2)`
+- [ ] Create Q4 (Secondary Market) → save as `Cards Market - Secondary Market (V2)`
+- [ ] Create Q5 (Card Types) → save as `Cards Market - Card Types (V2)`
+- [ ] Create Q6 (CC Gacha Plays) → save as `CC Gacha - Plays by Rarity (V2)` ⚠️ Medium engine
+- [ ] Create Q7 (CC P&L) → save as `CC Key Metrics - Weekly P&L (V2)`
 
-### Фаза 2: Создание запросов
+### Phase 2: Create Visualizations
 
-- [ ] **2.1** New Query → Вставь SQL из Query C.1 → Run → Сохрани как `Cards Market - KPI Counters (V1)`
-- [ ] **2.2** Создай **4 Counter визуализации** из Query C.1:
-  - [ ] C.1a: Total Market Volume (col: `total_volume_usd`, prefix: `$`, цвет: `#F59E0B`)
-  - [ ] C.1b: Unique Collectors (col: `unique_users`, цвет: `#8B5CF6`)
-  - [ ] C.1c: Market Leader (col: `top_project`, цвет: `#10B981`)
-  - [ ] C.1d: Weekly Momentum (col: `wow_growth_pct`, suffix: `%`, цвет: `#10B981`)
-- [ ] **2.3** New Query → SQL из Query C.2 → Run → Сохрани как `Cards Market - Weekly Volume: The Capital Race (V1)`
-- [ ] **2.4** Создай **2 визуализации** из Query C.2:
-  - [ ] C.2a: Stacked Bar — "The Capital Race: Weekly Inflows by Project"
-  - [ ] C.2b: 100% Stacked Area — "Market Share Drift: Who's Gaining Ground?"
-- [ ] **2.5** New Query → SQL из Query C.3 → Run → Сохрани как `Cards Market - Market Dominance Map (V1)`
-- [ ] **2.6** Создай **1 визуализацию**:
-  - [ ] C.3a: Donut Pie — "Market Dominance: Who Controls the Ecosystem?"
-- [ ] **2.7** New Query → SQL из Query C.4 → Run → Сохрани как `Cards Market - Aftermarket: Secondary Trading Volume (V1)`
-- [ ] **2.8** Создай **2 визуализации** из Query C.4:
-  - [ ] C.4a: Stacked Bar — "The Aftermarket: Weekly Secondary Volume"
-  - [ ] C.4b: Table — "Aftermarket Activity"
-- [ ] **2.9** New Query → SQL из Query C.5 → Run → Сохрани как `Cards Market - What's in the Pack? Card Types (V1)`
-- [ ] **2.10** Создай **1 визуализацию**:
-  - [ ] C.5a: Donut Pie — "What's in the Pack? Card Type Distribution"
-- [ ] **2.11** New Query → SQL из Query C.6 → Run → Сохрани как `Cards Market - Inside the Machine: CC Gacha Rarity Distribution (V1)`
-- [ ] **2.12** Создай **2 визуализации** из Query C.6:
-  - [ ] C.6a: Stacked Bar — "Inside the Machine: Gacha Rarity Distribution"
-  - [ ] C.6b: Line Chart — "Gacha Players: Weekly Unique Participants by Rarity"
+- [ ] Q1 → 5 counter widgets
+- [ ] Q2 → Stacked Bar + 100% Stacked Area
+- [ ] Q3 → Donut Pie
+- [ ] Q4 → Stacked Bar
+- [ ] Q5 → Donut Pie
+- [ ] Q6 → Stacked Bar + Line Chart
+- [ ] Q7 → Mixed Bar + Line
 
-### Фаза 3: Размещение виджетов на дашборде
+### Phase 3: Build Dashboard
 
-- [ ] **3.1** Открой дашборд → Edit
-- [ ] **3.2** Добавь Text Widget C.H (Row C-1): Header → 12 колонок
-- [ ] **3.3** Добавь Text Widget C.S1 (Row C-2): Market Pulse → 12 колонок
-- [ ] **3.4** Добавь 4 каунтера (Row C-3): C.1a + C.1b + C.1c + C.1d → по 3 колонки каждый
-- [ ] **3.5** Добавь Text Widget C.S2 (Row C-4): Capital Flow → 12 колонок
-- [ ] **3.6** Добавь Stacked Bar C.2a (Row C-5): Weekly Volume → 12 колонок
-- [ ] **3.7** Добавь 100% Area C.2b (Row C-6): Market Share Drift → 12 колонок
-- [ ] **3.8** Добавь Donut Pie C.3a (Row C-7): Market Dominance → 12 колонок
-- [ ] **3.9** Добавь Text Widget C.S3 (Row C-8): Aftermarket → 12 колонок
-- [ ] **3.10** Добавь Stacked Bar C.4a (Row C-9 left, 8 кол.) + Table C.4b (right, 4 кол.)
-- [ ] **3.11** Добавь Text Widget C.S4 (Row C-10): Deep Dive → 12 колонок
-- [ ] **3.12** Добавь Donut Pie C.5a (Row C-11 left, 6 кол.) + Stacked Bar C.6a (right, 6 кол.)
-- [ ] **3.13** Добавь Line Chart C.6b (Row C-12): Gacha Players → 12 колонок
-- [ ] **3.14** Добавь Text Widget C.F (Row C-13): Methodology → 12 колонок
+- [ ] Create new dashboard `Cards Market: The Gacha Economy Across Chains`
+- [ ] Add all text widgets (6 total)
+- [ ] Arrange per layout map (13 rows)
+- [ ] Apply color palette
+- [ ] Set descriptions on each visualization
+- [ ] Set dashboard description (English)
 
-### Фаза 4: Финальная проверка
+### Phase 4: Quality Assurance
 
-- [ ] **4.1** Проверь все каунтеры: формат, цвет, prefix/suffix
-- [ ] **4.2** Проверь все графики: цвета по chain-grouping, правильные оси
-- [ ] **4.3** Проверь все text widgets: markdown рендерится корректно
-- [ ] **4.4** Проверь порядок виджетов соответствует Layout карте выше
-- [ ] **4.5** Проверь Beezie показывает данные (NFT trades на Base)
-- [ ] **4.6** Проверь Courtyard показывает данные (NFT trades на Polygon)
-- [ ] **4.7** Проверь Collector Crypt показывает gacha USDC inflows (Solana)
-- [ ] **4.8** Проверь Upshot показывает USDC deposits (Base)
-- [ ] **4.9** Проверь CC gacha rarity chart показывает все 7 тиров
-- [ ] **4.10** Сохрани дашборд → убедись что Public
+- [ ] Verify all 5 projects show data in Q2 stacked bar
+- [ ] Verify market share % sums to ~100%
+- [ ] Verify CC gacha plays show all 7 rarity tiers
+- [ ] Verify P&L shows positive/negative net revenue
+- [ ] Cross-reference CC numbers with DefiLlama ($33M cumulative revenue)
+- [ ] Add ⚠️ note to Courtyard visualization description
+- [ ] Set query refresh schedule (every 6–12 hours)
+- [ ] Test all queries on Medium engine
 
 ---
 
 ## V2 ROADMAP
 
-Запланированные расширения после успешного запуска V1:
+### V2.1 — Buybacks by Project
+Track buyback flows (USDC from project wallets back to users):
+- CC: from gacha wallets → users (partially in Q7 already)
+- Phygitals: from `62Q9eeDY...` → users
+- Beezie: SWAP feature (needs address identification)
 
-| # | Feature | Описание | Статус |
-|---|---------|----------|--------|
-| 1 | **Phygitals** | Добавить Phygitals (Solana cNFTs) как 5-й проект | Требуется идентификация wallet addresses |
-| 2 | **Buyback Tracking** | Отслеживание buyback-программ (CC outflows, Beezie redemptions) | Нужны данные о buyback-механике каждого проекта |
-| 3 | **Cohort Analysis** | Ретеншн пользователей по когортам первого взаимодействия | Уже есть base query от Giedi (Monthly Retention) |
-| 4 | **CARDS Token Deep Dive** | Отдельная секция: price, holders, liquidity, concentration | DEX data доступна через `dex_solana.trades` |
-| 5 | **Cross-Project Type Analysis** | Распределение типов карт через NFT metadata (не только CC Sport wallet) | Требуется исследование metadata-структуры |
-| 6 | **Revenue / P&L** | Доходы проектов: fees, spreads, buyback margins | Есть base query (Key Metrics #7433053) |
-| 7 | **Beezie Primary vs Secondary** | Разделить первичные продажи и вторичку для Beezie | Требуется marketplace-specific фильтрация |
+### V2.2 — Buyer Cohort Analysis (Hempanda proposal)
+Segment buyers by average check size:
+- **Whales** (>$1000/week) — what % of volume do they control?
+- **Middles** ($100–$1000/week) — core loyal base
+- **Newcomers** (<$100/week) — market growth indicator
+
+### V2.3 — Monthly Retention (from query 7432781)
+Monthly cohort retention: what % of users from month N return in month N+1?
+Heavy query, requires materialization.
+
+### V2.4 — BNB Chain Integration
+Add BNB chain projects when identified. Color: `#F59E0B` (Amber).
+
+### V2.5 — Courtyard Fix
+When Spellbook PR #8704 merges → Courtyard marketplace trades appear in `nft.trades`.
+Alternative: parse raw Seaport events from `polygon.logs`.
+
+### V2.6 — Phygitals Card Types
+Phygitals supports: Pokémon, Baseball, Football, Basketball, One Piece, Yu-Gi-Oh!, Dragon Ball.
+On-chain type classification requires cNFT metadata parsing (Metaplex DAS API or similar).
 
 ---
 
-## ИЗВЕСТНЫЕ ОГРАНИЧЕНИЯ
+## KNOWN LIMITATIONS
 
-| Ограничение | Пояснение | Влияние |
-|-------------|-----------|---------|
-| **Beezie: primary + secondary объединены** | `nft.trades` не разделяет первичные и вторичные продажи без marketplace-фильтра | Volume может быть завышен для primary |
-| **CC: только USDC gacha inflows** | Если CC начнёт принимать другие токены — нужно добавить | Возможен undercount |
-| **Upshot: только deposits** | Withdrawals и P&L не трекаются в V1 | Неполная картина для Upshot |
-| **Phygitals: отложен** | cNFTs через Metaplex Bubblegum требуют отдельного подхода | 5-й проект отсутствует |
-| **WoW: только NFT рынки** | Solana gacha и Upshot не в WoW-расчёте | WoW не отражает полную картину |
-| **Dune engine: medium рекомендуется** | Query C.6 (gacha) тяжёлый по Solana transfers | Таймаут на small engine |
+1. **Courtyard undercount** — Own marketplace not yet indexed in `nft.trades` (Spellbook PR #8704 open). Numbers represent secondary marketplace trades only.
+2. **Cross-chain user dedup** — Same person on multiple chains counted as separate users. True unique count requires off-chain identity resolution.
+3. **Phygitals card types** — Cannot distinguish card types (Pokemon vs Sport vs One Piece) from on-chain USDC transfers alone. Requires cNFT metadata.
+4. **Solana query weight** — `tokens_solana.transfers` is one of the heaviest Dune tables. Medium engine required; small engine consistently times out.
+5. **No off-chain data** — Credit card purchases on Phygitals/Courtyard not captured (only on-chain USDC/crypto flows).
+6. **Buyback completeness** — Buyback tracking may miss some internal rebalancing flows despite exclusion lists.
+7. **BNB chain** — Referenced in team discussion but no specific project/address identified yet for V1.

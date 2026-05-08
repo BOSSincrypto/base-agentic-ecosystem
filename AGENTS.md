@@ -33,6 +33,7 @@ base-agentic-ecosystem/
       04_niche_card_types.sql                      # Query 4: Card types distribution (Pokemon/Sport)
       05_kpi_counters.sql                          # Query 5: Combined KPI counters
       06_collector_crypt_gacha_plays.sql           # Query 6: CC gacha plays by rarity (Solana)
+      07_cc_key_metrics_pnl.sql                     # Query 7: CC weekly P&L (gacha spend, buybacks, fees)
 ```
 
 ## Dashboard Sections
@@ -92,10 +93,11 @@ base-agentic-ecosystem/
 |---------|-------|-----------------|-------------|
 | Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | `nft.trades` |
 | Courtyard (NFT) | Polygon | `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` | `nft.trades` |
-| Collector Crypt (Gacha) | Solana | Gacha: `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` | `tokens_solana.transfers` |
+| Collector Crypt (Gacha) | Solana | 3 wallets: `GachaNgy...`, `GachazZsc...`, `96DULv1B...` | `tokens_solana.transfers` |
 | Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` | `dex_solana.trades` |
 | Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | `erc20_base.evt_Transfer` |
-| Phygitals (cNFTs) | Solana | V2 — compressed NFTs via Metaplex Bubblegum | V2 |
+| Phygitals (Gacha) | Solana | Main: `62Q9eeDY...`, Sec: `42oNTirN...`, Lucky: `4SabGkbL...` | `tokens_solana.transfers` |
+| Phygitals (Royalties) | Solana | `2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5` | `tokens_solana.transfers` |
 
 ## Code Standards
 
