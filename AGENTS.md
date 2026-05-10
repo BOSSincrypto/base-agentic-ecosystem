@@ -19,12 +19,23 @@ base-agentic-ecosystem/
     DASHBOARD_V1_UPDATE_GUIDE.md               # V1 iteration changes — what to update on the live dashboard
     OWB_POOL_RESEARCH_DEC_4_10_2025.md         # Standalone research: OWB token pool analysis
     SECTION_5_TOOLS_INFRA.md                   # Section 5: Tools & Infrastructure — full guide + SQL
+    CARDS_DASHBOARD_STANDALONE.md               # Standalone Cards Dashboard — RWA tokenized collectibles market
   queries/
     tools-infra/
       01_tools_infra_combined_kpis.sql          # Query 5.1: Combined KPIs for all infra projects
       02_tools_infra_daily_activity.sql          # Query 5.2: Daily activity trend (stacked bars)
       03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
       04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
+    cards-dashboard/
+      01_weekly_volume_by_project.sql              # Query 1: Weekly primary volume (stacked bar + market share %)
+      02_market_share_total.sql                    # Query 2: Total market share pie chart
+      03_secondary_market_volume.sql               # Query 3: Secondary market via nft.trades / DEX
+      04_niche_card_types.sql                      # Query 4: Card types distribution (Pokemon/Sport)
+      05_kpi_counters.sql                          # Query 5: Combined KPI counters
+      06_collector_crypt_gacha_plays.sql           # Query 6: CC gacha plays by rarity (Solana)
+      07_cc_key_metrics_pnl.sql                     # Query 7: CC weekly P&L (gacha spend, buybacks, fees)
+      08_phygitals_weekly_volume_by_bucket.sql        # Query 8: Phygitals weekly volume by spend bucket
+      09_phygitals_volume_by_pack_tier.sql            # Query 9: Phygitals volume & spins by exact pack tier
 ```
 
 ## Dashboard Sections
@@ -39,6 +50,7 @@ base-agentic-ecosystem/
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
 | Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
+| Cards Dashboard (Standalone) | Query 1–9 | Separate dashboard: market share, weekly volume, secondary, card types, CC gacha plays, Phygitals deep dive |
 
 ## Tracked Contracts
 
@@ -77,6 +89,17 @@ base-agentic-ecosystem/
 | Zerebro | `8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn` |
 | GRIFFAIN | `KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP` |
 | VIRTUAL (SOL) | `3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y` |
+
+### Cards Dashboard — Tracked Projects (Standalone)
+| Project | Chain | Address / Token | Data Source |
+|---------|-------|-----------------|-------------|
+| Beezie (NFT) | Base | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` | `nft.trades` |
+| Courtyard (Marketplace) | Polygon | Contract: `0x5e4943373c...`, topic0: `0xa6ae8077...` | `polygon.logs` (raw byte parse) |
+| Collector Crypt (Gacha) | Solana | 3 wallets: `GachaNgy...`, `GachazZsc...`, `96DULv1B...` | `tokens_solana.transfers` |
+| Collector Crypt (CARDS) | Solana | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` | `dex_solana.trades` |
+| Upshot (Deposits) | Base | `0x939dbbcf075de12d9d8df08ef727591ddebbc13b` | `erc20_base.evt_Transfer` |
+| Phygitals (Gacha) | Solana | Main: `62Q9eeDY...`, Sec: `42oNTirN...`, Lucky: `4SabGkbL...` | `tokens_solana.transfers` |
+| Phygitals (Royalties) | Solana | `2CEe9G68EqWmer21DhRhxJ3coUvRspDxT9NJuc2PJYo5` | `tokens_solana.transfers` |
 
 ## Code Standards
 
