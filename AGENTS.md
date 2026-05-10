@@ -34,6 +34,8 @@ base-agentic-ecosystem/
       05_kpi_counters.sql                          # Query 5: Combined KPI counters
       06_collector_crypt_gacha_plays.sql           # Query 6: CC gacha plays by rarity (Solana)
       07_cc_key_metrics_pnl.sql                     # Query 7: CC weekly P&L (gacha spend, buybacks, fees)
+      08_phygitals_weekly_volume_by_bucket.sql        # Query 8: Phygitals weekly volume by spend bucket
+      09_phygitals_volume_by_pack_tier.sql            # Query 9: Phygitals volume & spins by exact pack tier
 ```
 
 ## Dashboard Sections
@@ -48,7 +50,7 @@ base-agentic-ecosystem/
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
 | Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
-| Cards Dashboard (Standalone) | Query 1–6 | Separate dashboard: market share, weekly volume, secondary, card types, CC gacha plays |
+| Cards Dashboard (Standalone) | Query 1–9 | Separate dashboard: market share, weekly volume, secondary, card types, CC gacha plays, Phygitals deep dive |
 
 ## Tracked Contracts
 

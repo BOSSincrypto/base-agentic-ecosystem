@@ -31,13 +31,16 @@
 17. [Query C.5: Card Types — Niche Interest](#query-c5-card-types--whats-in-the-pack)
 18. [Query C.6: CC Gacha Plays by Rarity](#query-c6-collector-crypt-gacha--rarity-distribution)
 19. [Query C.7: CC Key Metrics P&L](#query-c7-collector-crypt-key-metrics--the-pl)
-20. [Text Widget C.F: Methodology & Sources](#text-widget-cf-methodology--sources)
-21. [Visualization Specs](#visualization-specs)
-22. [Layout Map](#layout-map)
-23. [Color Palette](#color-palette)
-24. [Implementation Checklist](#implementation-checklist)
-25. [V2 Roadmap](#v2-roadmap)
-26. [Known Limitations](#known-limitations)
+20. [Text Widget C.S5: Phygitals Deep Dive](#text-widget-cs5-phygitals-deep-dive)
+21. [Query C.8: Phygitals Weekly Volume by Bucket](#query-c8-phygitals-weekly-volume-by-bucket)
+22. [Query C.9: Phygitals Volume & Spins by Pack Tier](#query-c9-phygitals-volume--spins-by-pack-tier)
+23. [Text Widget C.F: Methodology & Sources](#text-widget-cf-methodology--sources)
+24. [Visualization Specs](#visualization-specs)
+25. [Layout Map](#layout-map)
+26. [Color Palette](#color-palette)
+27. [Implementation Checklist](#implementation-checklist)
+28. [V2 Roadmap](#v2-roadmap)
+29. [Known Limitations](#known-limitations)
 
 ---
 
@@ -455,15 +458,27 @@ phygitals_vol AS (
       )
 ),
 
+vol_values AS (
+    SELECT
+        (SELECT vol FROM beezie_vol)    AS beezie_v,
+        (SELECT vol FROM courtyard_vol) AS courtyard_v,
+        (SELECT vol FROM cc_vol)        AS cc_v,
+        (SELECT vol FROM upshot_vol)    AS upshot_v,
+        (SELECT vol FROM phygitals_vol) AS phygitals_v
+),
+
 all_projects AS (
     SELECT project, vol FROM (
-        VALUES
-            ('Beezie',          (SELECT vol FROM beezie_vol)),
-            ('Courtyard',       (SELECT vol FROM courtyard_vol)),
-            ('Collector Crypt', (SELECT vol FROM cc_vol)),
-            ('Upshot',          (SELECT vol FROM upshot_vol)),
-            ('Phygitals',       (SELECT vol FROM phygitals_vol))
-    ) AS t(project, vol)
+        SELECT 'Beezie' AS project, beezie_v AS vol FROM vol_values
+        UNION ALL
+        SELECT 'Courtyard', courtyard_v FROM vol_values
+        UNION ALL
+        SELECT 'Collector Crypt', cc_v FROM vol_values
+        UNION ALL
+        SELECT 'Upshot', upshot_v FROM vol_values
+        UNION ALL
+        SELECT 'Phygitals', phygitals_v FROM vol_values
+    )
 ),
 
 this_week AS (
@@ -1220,7 +1235,7 @@ Weekly P&L for Collector Crypt's gacha economy. Tracks USDC inflows (gacha spend
 
 > **Title:** `CC Key Metrics — Weekly P&L (V2)`
 > **Viz Title:** `Collector Crypt P&L: Revenue vs Buybacks`
-> **Description:** Is Collector Crypt making money? Weekly USDC flows through the gacha system — what comes in (gacha spend), what goes out (buybacks to players), and what stays (net revenue + fees). When net_revenue is positive, the project is profitable.
+> **Description:** Is Collector Crypt making money? Weekly USDC flows through the gacha system — what comes in (gacha spend), what goes out (buybacks to players), and what stays (net revenue = gacha_spend − buyback). Fees shown separately as breakdown. When net_revenue is positive, the project is profitable.
 
 ### SQL
 
@@ -1328,7 +1343,6 @@ SELECT
     COALESCE(ROUND(b.buyback, 2), 0)                                  AS buyback,
     COALESCE(ROUND(f.fees, 2), 0)                                     AS fees,
     COALESCE(ROUND(g.gacha_spend, 2), 0)
-      + COALESCE(ROUND(f.fees, 2), 0)
       - COALESCE(ROUND(b.buyback, 2), 0)                              AS net_revenue
 FROM gacha_weekly g
 FULL OUTER JOIN fees_weekly f ON g.week = f.week
@@ -1346,6 +1360,200 @@ ORDER BY week DESC
 | Bar series | `gacha_spend` (green), `buyback` (red) |
 | Line series | `net_revenue` (blue, dashed) |
 | Height | 350px |
+
+---
+
+## TEXT WIDGET C.S5: PHYGITALS DEEP DIVE
+
+**Row C-13:** Full width (12 columns).
+
+```markdown
+---
+
+## Phygitals Deep Dive: Inside the Pack Machine
+
+Phygitals (Solana) is the broadest gacha platform by card variety: Pokemon, Baseball, Football, Basketball, One Piece, Yu-Gi-Oh!, Dragon Ball. The volume breakdown by spend bucket reveals the customer mix — from $1 micro-spins to $70K whale packs. The tier distribution shows which price points drive the most revenue.
+
+> Phygitals operates 3 receiving wallets: main gacha, secondary, and lucky draw — all tracked below.
+```
+
+---
+
+## QUERY C.8: PHYGITALS WEEKLY VOLUME BY BUCKET
+
+### What It Does
+
+Weekly volume timeline for Phygitals, broken down by spend bucket (Micro/Low/Mid/High/Whale). Reveals the customer profile: are volumes driven by many small spins or few whale purchases?
+
+### Dashboard Description
+
+> **Title:** `Phygitals — Weekly Volume by Bucket`
+> **Viz Title:** `Phygitals Spend Profile: Weekly Volume by Customer Tier`
+> **Description:** How Phygitals revenue breaks down by customer size. Micro ($1–$25) vs Low ($50–$350) vs Mid ($400–$1500) vs High ($2000–$17500) vs Whale ($20000+). Stacked bars show the mix shifting over time.
+
+### SQL
+
+**File:** `queries/cards-dashboard/08_phygitals_weekly_volume_by_bucket.sql`
+
+```sql
+-- Q8: Phygitals — Weekly Volume by Bucket
+-- Timeline of weekly volumes, tiers grouped into spend buckets
+-- Source: dune.com/queries/7458642 (adapted)
+-- Engine: Medium (Solana)
+
+WITH base AS (
+    SELECT
+        DATE_TRUNC('week', block_time) AS week,
+        amount_usd,
+        CASE
+            WHEN amount_usd BETWEEN 0.01  AND 31     THEN '1_Micro ($1-$25)'
+            WHEN amount_usd BETWEEN 31    AND 402    THEN '2_Low ($50-$350)'
+            WHEN amount_usd BETWEEN 402   AND 1502   THEN '3_Mid ($400-$1500)'
+            WHEN amount_usd BETWEEN 1502  AND 17505  THEN '4_High ($2000-$17500)'
+            WHEN amount_usd > 17505                  THEN '5_Whale ($20000+)'
+            ELSE '6_Other'
+        END AS bucket
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2025-04-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+      AND from_owner NOT IN (
+          '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+          '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'
+      )
+      AND amount_usd > 0.01
+)
+
+SELECT
+    week,
+    ROUND(SUM(CASE WHEN bucket = '1_Micro ($1-$25)'      THEN amount_usd ELSE 0 END), 2) AS micro,
+    ROUND(SUM(CASE WHEN bucket = '2_Low ($50-$350)'      THEN amount_usd ELSE 0 END), 2) AS low,
+    ROUND(SUM(CASE WHEN bucket = '3_Mid ($400-$1500)'    THEN amount_usd ELSE 0 END), 2) AS mid,
+    ROUND(SUM(CASE WHEN bucket = '4_High ($2000-$17500)' THEN amount_usd ELSE 0 END), 2) AS high,
+    ROUND(SUM(CASE WHEN bucket = '5_Whale ($20000+)'     THEN amount_usd ELSE 0 END), 2) AS whale,
+    ROUND(SUM(amount_usd), 2) AS total_volume_usd,
+    COUNT(*) AS total_spins
+FROM base
+GROUP BY 1
+ORDER BY 1
+```
+
+### Visualization: Stacked Bar Chart
+
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Stacked Bar |
+| X-axis | `week` |
+| Y-axis stacks | `micro`, `low`, `mid`, `high`, `whale` |
+| Colors | micro=`#94A3B8` (slate), low=`#60A5FA`, mid=`#34D399`, high=`#F59E0B`, whale=`#EF4444` |
+| Height | 350px |
+
+---
+
+## QUERY C.9: PHYGITALS VOLUME & SPINS BY PACK TIER
+
+### What It Does
+
+Revenue breakdown by exact pack price tier ($1, $5, $50, $500, $10000, etc.). Shows which price points generate the most volume and which have the most spins. Reveals whale concentration.
+
+### Dashboard Description
+
+> **Title:** `Phygitals — Volume & Spins by Pack Tier`
+> **Viz Title:** `Phygitals Pack Economy: Who Drives the Money?`
+> **Description:** Exact price-tier breakdown of Phygitals gacha. Each row = one pack price ($1 to $70000). See which tiers dominate volume vs spin count. Whales buying $10K+ packs may generate more revenue than thousands of $1 micro-spins.
+
+### SQL
+
+**File:** `queries/cards-dashboard/09_phygitals_volume_by_pack_tier.sql`
+
+```sql
+-- Q9: Phygitals — Volume & Spins by Pack Tier
+-- Total revenue by exact pack price tiers, who drives the money
+-- Source: dune.com/queries/7458646 (adapted)
+-- Engine: Medium (Solana)
+
+WITH base AS (
+    SELECT
+        amount_usd,
+        CASE
+            WHEN amount_usd BETWEEN 0.5   AND 1.5    THEN '$1'
+            WHEN amount_usd BETWEEN 1.6   AND 2.4    THEN '$2'
+            WHEN amount_usd BETWEEN 4.5   AND 5.4    THEN '$5'
+            WHEN amount_usd BETWEEN 5.5   AND 6.5    THEN '$6'
+            WHEN amount_usd BETWEEN 9.5   AND 10.5   THEN '$10'
+            WHEN amount_usd BETWEEN 14.5  AND 15.5   THEN '$15'
+            WHEN amount_usd BETWEEN 20    AND 31     THEN '$25'
+            WHEN amount_usd BETWEEN 45    AND 55     THEN '$50'
+            WHEN amount_usd BETWEEN 73    AND 86     THEN '$80'
+            WHEN amount_usd BETWEEN 98    AND 102    THEN '$100'
+            WHEN amount_usd BETWEEN 123   AND 127    THEN '$125'
+            WHEN amount_usd BETWEEN 148   AND 153    THEN '$150'
+            WHEN amount_usd BETWEEN 158   AND 162    THEN '$160'
+            WHEN amount_usd BETWEEN 198   AND 202    THEN '$200'
+            WHEN amount_usd BETWEEN 240   AND 261    THEN '$250'
+            WHEN amount_usd BETWEEN 298   AND 302    THEN '$300'
+            WHEN amount_usd BETWEEN 348   AND 352    THEN '$350'
+            WHEN amount_usd BETWEEN 398   AND 402    THEN '$400'
+            WHEN amount_usd BETWEEN 498   AND 502    THEN '$500'
+            WHEN amount_usd BETWEEN 748   AND 752    THEN '$750'
+            WHEN amount_usd BETWEEN 798   AND 802    THEN '$800'
+            WHEN amount_usd BETWEEN 998   AND 1002   THEN '$1000'
+            WHEN amount_usd BETWEEN 1248  AND 1252   THEN '$1250'
+            WHEN amount_usd BETWEEN 1498  AND 1502   THEN '$1500'
+            WHEN amount_usd BETWEEN 1998  AND 2002   THEN '$2000'
+            WHEN amount_usd BETWEEN 2498  AND 2504   THEN '$2500'
+            WHEN amount_usd BETWEEN 2998  AND 3002   THEN '$3000'
+            WHEN amount_usd BETWEEN 3998  AND 4002   THEN '$4000'
+            WHEN amount_usd BETWEEN 4997  AND 5004   THEN '$5000'
+            WHEN amount_usd BETWEEN 5997  AND 6003   THEN '$6000'
+            WHEN amount_usd BETWEEN 6997  AND 7003   THEN '$7000'
+            WHEN amount_usd BETWEEN 7498  AND 7502   THEN '$7500'
+            WHEN amount_usd BETWEEN 7995  AND 8005   THEN '$8000'
+            WHEN amount_usd BETWEEN 9996  AND 10004  THEN '$10000'
+            WHEN amount_usd BETWEEN 12497 AND 12505  THEN '$12500'
+            WHEN amount_usd BETWEEN 14998 AND 15005  THEN '$15000'
+            WHEN amount_usd BETWEEN 17497 AND 17505  THEN '$17500'
+            WHEN amount_usd BETWEEN 19993 AND 20010  THEN '$20000'
+            WHEN amount_usd BETWEEN 24997 AND 25010  THEN '$25000'
+            WHEN amount_usd BETWEEN 29997 AND 30006  THEN '$30000'
+            WHEN amount_usd BETWEEN 34997 AND 35010  THEN '$35000'
+            WHEN amount_usd BETWEEN 39997 AND 40015  THEN '$40000'
+            WHEN amount_usd BETWEEN 49998 AND 50005  THEN '$50000'
+            WHEN amount_usd BETWEEN 69997 AND 70015  THEN '$70000'
+            ELSE 'Other'
+        END AS pack_tier
+    FROM tokens_solana.transfers
+    WHERE block_date >= DATE '2026-01-01'
+      AND token_mint_address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      AND to_owner = '62Q9eeDY3eM8A5CnprBGYMPShdBjAzdpBdr71QHsS8dS'
+      AND from_owner NOT IN (
+          '42oNTirN62M3MkA52KiTTGyf9RnDh2YvqNdpFSgkf97e',
+          '5sn2nniGv88bxzxBDkqWP6i8bejsr9WwCpZXq2ZkLHgf'
+      )
+      AND amount_usd > 0.01
+)
+
+SELECT
+    pack_tier,
+    COUNT(*)                                                                  AS spins,
+    ROUND(SUM(amount_usd), 2)                                                 AS volume_usd,
+    ROUND(AVG(amount_usd), 2)                                                 AS avg_spin_usd,
+    ROUND(100.0 * SUM(amount_usd) / SUM(SUM(amount_usd)) OVER (), 2)          AS pct_of_total_volume,
+    ROUND(100.0 * COUNT(*)        / SUM(COUNT(*))         OVER (), 2)          AS pct_of_total_spins
+FROM base
+GROUP BY 1
+ORDER BY avg_spin_usd ASC
+```
+
+### Visualization: Table + Bar
+
+| Parameter | Value |
+|-----------|-------|
+| Chart type | Table (sortable, with embedded bar for `pct_of_total_volume`) |
+| Columns | `pack_tier`, `spins`, `volume_usd`, `avg_spin_usd`, `pct_of_total_volume`, `pct_of_total_spins` |
+| Sort default | `avg_spin_usd ASC` |
+| Highlight | Rows where `pct_of_total_volume > 10%` |
+| Height | 400px |
 
 ---
 
@@ -1438,10 +1646,13 @@ Row C-9:  [======== C.S4: Deep Dive text (12 col) =========]
 Row C-10: [== Q5: Card Types Donut (4 col) ==][== Q6 Viz1: Gacha Rarity Bar (8 col) ==]
 Row C-11: [====== Q6 Viz2: Gacha Players Line (12 col) ======]
 Row C-12: [====== Q7: CC P&L Bar+Line (12 col) ======]
-Row C-13: [======== C.F: Methodology & Sources (12 col) ====]
+Row C-13: [======== C.S5: Phygitals Deep Dive text (12 col) =]
+Row C-14: [====== Q8: Phygitals Volume by Bucket (12 col) ===]
+Row C-15: [====== Q9: Phygitals Pack Tier Table (12 col) ====]
+Row C-16: [======== C.F: Methodology & Sources (12 col) ====]
 ```
 
-**Total: 13 rows · 7 queries · 6 text widgets · 5 counters · 7 charts = 25 widgets**
+**Total: 16 rows · 9 queries · 7 text widgets · 5 counters · 9 charts = 30 widgets**
 
 ---
 
@@ -1456,6 +1667,8 @@ Row C-13: [======== C.F: Methodology & Sources (12 col) ====]
 - [ ] Create Q5 (Card Types) → save as `Cards Market - Card Types (V2)`
 - [ ] Create Q6 (CC Gacha Plays) → save as `CC Gacha - Plays by Rarity (V2)` ⚠️ Medium engine
 - [ ] Create Q7 (CC P&L) → save as `CC Key Metrics - Weekly P&L (V2)`
+- [ ] Create Q8 (Phygitals Volume by Bucket) → save as `Phygitals - Weekly Volume by Bucket` ⚠️ Medium engine
+- [ ] Create Q9 (Phygitals Pack Tier) → save as `Phygitals - Volume & Spins by Pack Tier` ⚠️ Medium engine
 
 ### Phase 2: Create Visualizations
 
@@ -1466,12 +1679,14 @@ Row C-13: [======== C.F: Methodology & Sources (12 col) ====]
 - [ ] Q5 → Donut Pie
 - [ ] Q6 → Stacked Bar + Line Chart
 - [ ] Q7 → Mixed Bar + Line
+- [ ] Q8 → Stacked Bar (bucket breakdown)
+- [ ] Q9 → Sortable Table with bar
 
 ### Phase 3: Build Dashboard
 
 - [ ] Create new dashboard `Cards Market: The Gacha Economy Across Chains`
-- [ ] Add all text widgets (6 total)
-- [ ] Arrange per layout map (13 rows)
+- [ ] Add all text widgets (7 total)
+- [ ] Arrange per layout map (16 rows)
 - [ ] Apply color palette
 - [ ] Set descriptions on each visualization
 - [ ] Set dashboard description (English)
@@ -1482,6 +1697,8 @@ Row C-13: [======== C.F: Methodology & Sources (12 col) ====]
 - [ ] Verify market share % sums to ~100%
 - [ ] Verify CC gacha plays show all 7 rarity tiers
 - [ ] Verify P&L shows positive/negative net revenue
+- [ ] Verify Phygitals bucket chart shows all 5 tiers (Micro/Low/Mid/High/Whale)
+- [ ] Verify Phygitals pack tier table has realistic tier distribution
 - [ ] Cross-reference CC numbers with DefiLlama ($33M cumulative revenue)
 - [ ] Add ⚠️ note to Courtyard visualization description
 - [ ] Set query refresh schedule (every 6–12 hours)

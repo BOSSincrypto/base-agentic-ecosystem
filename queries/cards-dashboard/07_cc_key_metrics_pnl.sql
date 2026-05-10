@@ -99,7 +99,6 @@ SELECT
     COALESCE(ROUND(b.buyback, 2), 0)                                  AS buyback,
     COALESCE(ROUND(f.fees, 2), 0)                                     AS fees,
     COALESCE(ROUND(g.gacha_spend, 2), 0)
-      + COALESCE(ROUND(f.fees, 2), 0)
       - COALESCE(ROUND(b.buyback, 2), 0)                              AS net_revenue
 FROM gacha_weekly g
 FULL OUTER JOIN fees_weekly f ON g.week = f.week

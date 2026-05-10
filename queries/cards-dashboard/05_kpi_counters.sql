@@ -92,15 +92,27 @@ phygitals_vol AS (
       )
 ),
 
+vol_values AS (
+    SELECT
+        (SELECT vol FROM beezie_vol)    AS beezie_v,
+        (SELECT vol FROM courtyard_vol) AS courtyard_v,
+        (SELECT vol FROM cc_vol)        AS cc_v,
+        (SELECT vol FROM upshot_vol)    AS upshot_v,
+        (SELECT vol FROM phygitals_vol) AS phygitals_v
+),
+
 all_projects AS (
     SELECT project, vol FROM (
-        VALUES
-            ('Beezie',          (SELECT vol FROM beezie_vol)),
-            ('Courtyard',       (SELECT vol FROM courtyard_vol)),
-            ('Collector Crypt', (SELECT vol FROM cc_vol)),
-            ('Upshot',          (SELECT vol FROM upshot_vol)),
-            ('Phygitals',       (SELECT vol FROM phygitals_vol))
-    ) AS t(project, vol)
+        SELECT 'Beezie' AS project, beezie_v AS vol FROM vol_values
+        UNION ALL
+        SELECT 'Courtyard', courtyard_v FROM vol_values
+        UNION ALL
+        SELECT 'Collector Crypt', cc_v FROM vol_values
+        UNION ALL
+        SELECT 'Upshot', upshot_v FROM vol_values
+        UNION ALL
+        SELECT 'Phygitals', phygitals_v FROM vol_values
+    )
 ),
 
 this_week AS (
