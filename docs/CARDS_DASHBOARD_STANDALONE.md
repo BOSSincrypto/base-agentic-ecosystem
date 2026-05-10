@@ -1636,8 +1636,8 @@ SELECT
     COUNT(*)                                                                  AS spins,
     ROUND(SUM(amount_usd), 2)                                                 AS volume_usd,
     ROUND(AVG(amount_usd), 2)                                                 AS avg_spin_usd,
-    ROUND(100.0 * SUM(amount_usd) / SUM(SUM(amount_usd)) OVER (), 2)          AS pct_of_total_volume,
-    ROUND(100.0 * COUNT(*)        / SUM(COUNT(*))         OVER (), 2)          AS pct_of_total_spins
+    ROUND(100.0 * SUM(amount_usd) / NULLIF(SUM(SUM(amount_usd)) OVER (), 0), 2) AS pct_of_total_volume,
+    ROUND(100.0 * COUNT(*)        / NULLIF(SUM(COUNT(*))         OVER (), 0), 2) AS pct_of_total_spins
 FROM base
 GROUP BY 1
 ORDER BY avg_spin_usd ASC
