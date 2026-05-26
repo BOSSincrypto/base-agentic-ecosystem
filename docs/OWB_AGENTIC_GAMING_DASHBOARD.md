@@ -4,7 +4,7 @@
 >
 > Dashboard URL (target): `https://dune.com/ax1research/base-agentic-gaming`
 >
-> Chain: **Base** · Last updated: March 2026
+> Chain: **Base** · Last updated: April 2026
 
 ---
 
@@ -39,11 +39,11 @@ This dashboard provides a comprehensive analytics suite for **OWB (Clash of Coin
 
 | Section | Focus | Queries |
 |---------|-------|---------|
-| 1–2 | Ecosystem Overview & KPIs | 2 |
+| 1–2 | Ecosystem Overview & KPIs | 4 |
 | 3 | Base Agentic Gaming (emerging projects) | 2 |
-| 4 | OWB Agentic Gaming (MRR, Bots, Txs) | 5 |
-| 5 | Deep Analytics (Holders, Liquidity, In-Game) | 4 |
-| **Total** | | **13 queries** |
+| 4 | OWB Agentic Gaming (Revenue, DTU, Txs) | 7 |
+| 5 | Deep Analytics (Holders, Liquidity, In-Game, Retention) | 5 |
+| **Total** | | **18 queries** |
 
 ---
 
@@ -56,7 +56,10 @@ All addresses verified on BaseScan (March 2026). These are the contracts tracked
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | **OWB Token** | `0xEF5997c2cf2f6c138196f8a6203afc335206b3c1` | ERC-20 governance/utility token |
-| **Staking** | `0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb` | OWB staking with dynamic APY |
+| **Staking** | `0x692d11c779d43BBC12Cb8565C7f71a54A47D117c` | OWB staking with dynamic APY |
+| **Agentic Claim 1** | `0x98430ECBe49bf6dB549D6F827d95ed7A3625FAeb` | Agentic presale claims |
+| **Agentic Claim 2** | `0xdbfB8BB5464BEf64F499457d3E5Dfd2AD7368203` | Agentic claims v2 |
+| **Treasury** | `0x8b29DABD6fBb5A09DAcbC7978eaed66A8540721d` | Project treasury |
 | **Rewards Claim** | `0x0fbBBd928EA4eDDd2EAfF51D4D412a3b65452F40` | Claim rewards from Clash of Coins |
 | **COC Token** | `0x4c3DEa2858e66c1e116b1eB54b4404025F84cFE9` | In-game currency (Clash of Coins) |
 | **oCOIN Token** | `0x5B8F638330d7D6bD9D43811fe702F6894e97EF03` | Secondary in-game token (NOTE: team questions relevance — verify before using) |
@@ -192,16 +195,17 @@ Score = 55% × (project_txs_30d / max_txs_30d) + 45% × (project_users_30d / max
 
 This is the deepest section of the dashboard, containing three key metric groups:
 
-### 4A: MRR (Monthly Recurring Revenue)
+### 4A: Revenue Proxy
 
-### Query 10: MRR Proxy
+### Query 10: Revenue Proxy
 
 **File:** `queries/owb-gaming-dashboard/10_owb_mrr_proxy.sql`
 
-**Purpose:** Estimates Monthly Recurring Revenue from:
-1. **LP Fee Revenue** — trading fees generated on Uniswap V3 and Aerodrome pools (estimated at 0.2% average across fee tiers)
-2. **Gas Revenue** — ETH gas spent on staking and claiming operations (converted to USD at ~$2000/ETH)
-3. **Token Transfer Activity** — volume of OWB transferred outside of pools/staking (game economy proxy)
+**Purpose:** Estimates Monthly Revenue from:
+1. **NFT Sales (Web)** — USDC payments to CoC NFT Sales Web contract
+2. **NFT Sales (Base App)** — USDC payments to CoC NFT Sales Base App contract
+3. **Treasury Revenue** — USDC transfers to project treasury
+4. **LP Fee Revenue** — trading fees estimated at 0.2% of DEX volume
 
 **Visualizations:**
 
@@ -223,16 +227,16 @@ This is the deepest section of the dashboard, containing three key metric groups
 
 ---
 
-### 4B: Number of Bots
+### 4B: DTU (Daily Transacting Users)
 
-The "Number of Bots" metric uses **3 complementary indicators**:
+The DTU metric uses **3 complementary indicators**:
 
-#### Indicator 1: Bot Classification Summary (Query 8)
+#### Indicator 1: DTU Classification Summary (Query 8)
 
 **File:** `queries/owb-gaming-dashboard/08_owb_bot_metrics.sql`
 
 **Purpose:** Classifies all wallets interacting with OWB contracts into behavior types:
-- **High-Frequency Bot**: 50+ claims, avg interval < 15 min
+- **High-Frequency Automated**: 50+ claims, avg interval < 15 min
 - **Semi-Automated**: 20+ claims, avg interval < 1 hour
 - **Active Player**: 10+ claims
 - **Casual Player**: 3+ claims
@@ -242,7 +246,7 @@ The "Number of Bots" metric uses **3 complementary indicators**:
 
 | Series | Color |
 |--------|-------|
-| High-Frequency Bot | `#EF4444` (Red) |
+| High-Frequency Automated | `#EF4444` (Red) |
 | Semi-Automated | `#F59E0B` (Amber) |
 | Active Player | `#10B981` (Green) |
 | Casual Player | `#3B82F6` (Blue) |
@@ -253,28 +257,28 @@ The "Number of Bots" metric uses **3 complementary indicators**:
 - Data labels: show both count and "% of All Wallets"
 
 **Counter Widgets:**
-- "Total Identified Bots" → sum of High-Frequency Bot + Semi-Automated wallet counts
-- "Bot Claim Share" → sum of their "% of All Claims"
+- "Total Identified DTU" → sum of High-Frequency Automated + Semi-Automated wallet counts
+- "DTU Claim Share" → sum of their "% of All Claims"
 
-#### Indicator 2: Bot Activity Daily Trend (Query 9)
+#### Indicator 2: DTU Activity Daily Trend (Query 9)
 
 **File:** `queries/owb-gaming-dashboard/09_owb_bot_daily_trend.sql`
 
-**Purpose:** Daily breakdown of claims by wallet type (Bot / Semi-Auto / Human), showing how automated activity evolves over time.
+**Purpose:** Daily breakdown of claims by wallet type (Automated / Semi-Auto / Manual), showing how automated activity evolves over time.
 
-**Visualization: Stacked Area Chart — "Bot vs Human Claims Over Time"**
+**Visualization: Stacked Area Chart — "Automated vs Manual Claims Over Time"**
 
 | Series | Color |
 |--------|-------|
-| Bot | `#EF4444` (Red) |
+| Automated | `#EF4444` (Red) |
 | Semi-Auto | `#F59E0B` (Amber) |
-| Human | `#10B981` (Green) |
+| Manual | `#10B981` (Green) |
 
 - X-axis: `day`
 - Y-axis: `Claims` (stacked)
 - Chart height: 300px
 
-#### Indicator 3: Top Bot Wallets (Query 13)
+#### Indicator 3: Top DTU Wallets (Query 13)
 
 **File:** `queries/owb-gaming-dashboard/13_owb_bot_top_wallets.sql`
 
@@ -294,17 +298,17 @@ The "Number of Bots" metric uses **3 complementary indicators**:
 | First Seen / Last Active | Date |
 
 - Sort default: Total Txs DESC
-- Conditional formatting: Red rows for "High-Frequency Bot", Amber for "Semi-Automated"
+- Conditional formatting: Red rows for "High-Frequency Automated", Amber for "Semi-Automated"
 
 #### Bonus Indicator: Activity Heatmap (Query 14)
 
 **File:** `queries/owb-gaming-dashboard/14_owb_bot_hourly_heatmap.sql`
 
-**Purpose:** Hour-of-day × day-of-week activity patterns. Bots show uniform 24/7 patterns while humans cluster in timezone-specific hours.
+**Purpose:** Hour-of-day x day-of-week activity patterns. Automated users show uniform 24/7 patterns while manual users cluster in timezone-specific hours.
 
 **Visualization: Heatmap** (if supported) or **Grouped Bar Chart**
 - X-axis: `Hour (UTC)`
-- Series: `Bot`, `Semi-Auto`, `Human`
+- Series: `Automated`, `Semi-Auto`, `Manual`
 - Alternative: Pivot table with days as rows, hours as columns, colored by intensity
 
 ---
@@ -776,4 +780,6 @@ Example addition:
 ---
 
 *Dashboard designed for the [base-agentic-ecosystem](https://github.com/BOSSincrypto/base-agentic-ecosystem) repository.*
-*Research and queries by Devin AI — March 2026.*
+*Research and queries by Devin AI — April 2026.*
+
+> **See also:** [OWB_DASHBOARD_UPDATE_INSTRUCTIONS.md](./OWB_DASHBOARD_UPDATE_INSTRUCTIONS.md) for the April 2026 update guide with all fixes and new queries.
