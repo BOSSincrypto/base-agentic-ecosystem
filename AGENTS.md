@@ -25,6 +25,17 @@ base-agentic-ecosystem/
       02_tools_infra_daily_activity.sql          # Query 5.2: Daily activity trend (stacked bars)
       03_coc_x402_agentic_payments.sql           # Query 5.3: CoC x402 agentic payments deep dive
       04_agently_catalog_growth.sql               # Query 5.4: Agently catalog — agent growth & composition
+    cards-market/
+      01_cc_gacha_plays_by_rarity.sql            # Query 7.1: CC gacha plays (aggregate fallback)
+      02_cc_gacha_revenue_inflow.sql             # Query 7.2: CC USDC inflow to gacha wallets
+      03_cc_buyback_net_revenue.sql              # Query 7.3: CC buyback outflow + net revenue
+      04_cc_cards_dex_volume.sql                 # Query 7.4a: $CARDS daily DEX volume & traders
+      05_cc_cards_price.sql                      # Query 7.4b: $CARDS price series (VWAP fallback)
+      06_cc_cards_top_holders.sql                # Query 7.4c: $CARDS top 20 holders
+      07_card_type_overall_pie.sql               # Query 8.1: Overall card type by category (donut)
+      08_card_type_per_project.sql               # Query 8.2: Category mix per project (stacked bar)
+      09_beezie_claw_inflow.sql                  # Query 9.1: Beezie claw inflow by tier
+      10_beezie_buyback.sql                      # Query 9.2: Beezie buyback via swap pool
 ```
 
 ## Dashboard Sections
@@ -39,6 +50,9 @@ base-agentic-ecosystem/
 | Virtuals Protocol | Query 5 | Token economics, trading activity, agent token health |
 | Base vs Solana | Query 6/7 | Head-to-head: DEX volume, traders, avg trade size, growth dynamics |
 | Tools & Infrastructure | Query 5.1/5.2/5.3/5.4 | Batches 3.0 infra: BlockRunAI, Floe Labs, CoC x402 agentic payments, Agently catalog |
+| CC Deep Dive (Cards) | Query 7.1/7.2/7.3/7.4a/7.4b/7.4c | Collector Crypt gacha plays, USDC inflow, buyback/net revenue, $CARDS token |
+| Card Type Mix (Cards) | Query 8.1/8.2 | Card type composition by IP category across all projects |
+| Beezie Deep Dive (Cards) | Query 9.1/9.2 | Beezie claw inflow by tier, buyback via swap pool |
 
 ## Tracked Contracts
 
@@ -77,6 +91,31 @@ base-agentic-ecosystem/
 | Zerebro | `8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn` |
 | GRIFFAIN | `KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP` |
 | VIRTUAL (SOL) | `3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y` |
+
+### Cards Market — Collector Crypt (Solana)
+| Wallet | Address |
+|--------|---------|
+| Gacha N | `GachaNgyXTU3zFogQ8Z5jR2BLXs8215X2AtEH18VxJq3` |
+| Gacha Z | `GachazZscHZ5bn3vnq1yEC4zpYdhAYJBzuKJwSJksc9z` |
+| Main | `96DULv1BqYfe5wyMr6pVUNC6Uyrtj6yr3tNi6VtfwW9s` |
+| $CARDS Token | `CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp` |
+| USDC (Solana) | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+
+### Cards Market — Beezie (Base)
+| Project | Address |
+|---------|---------|
+| Hub V1 | `0x964E72Ae6BE07a191bE1778DbC52457272a53154` |
+| Hub V2 | `0xAa9CfAA6cAB4D3bFeEAb5deE99401df22f855A6b` |
+| SWAP (buyback) | `0x80d7C04B738eF379971a6b73f25B1A71ea1c820D` |
+| Fee receiver | `0x7b50cb4a207cf86a9ccec11aa14a3e45f2db5718` |
+| NFT collection | `0xbb5ec6fd4b61723bd45c399840f1d868840ca16f` |
+| Marketplace | `0xac305f7e7fe93a13b110b39ed98be556476d247f` |
+
+### Cards Market — Courtyard (Polygon)
+| Project | Address |
+|---------|---------|
+| Primary mints | `0x776023a4573bd972c4c3e2a76f611d3c2bef516e` |
+| NFT contract | `0x251be3a17af4892035c37ebf5890f4a4d889dcad` |
 
 ## Code Standards
 
